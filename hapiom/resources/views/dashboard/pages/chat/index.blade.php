@@ -231,7 +231,7 @@
 		var userId = parseInt(userIdStr);
 		var receiverId = "";
 
-		var socket = io.connect("http://hapiom.com/nodesock")
+		var socket = io.connect("https://hapiom.com/nodesock")
 		$(document).ready(function() {
 
 			if (partner) {
