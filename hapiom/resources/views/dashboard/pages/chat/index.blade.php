@@ -231,7 +231,7 @@
 		var userId = parseInt(userIdStr);
 		var receiverId = "";
 
-		var socket = io.connect("http://localhost:4000")
+		var socket = io.connect("http://hapiom.com/nodesock")
 		$(document).ready(function() {
 
 			if (partner) {
