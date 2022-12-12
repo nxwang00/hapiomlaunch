@@ -1,7 +1,7 @@
 module.exports = {
   host: "localhost",
-  user: "root",
-  password: "",
+  user: "hapiomer",
+  password: "dl^efp#ye",
   database: "hapiomco_db",
   charset: "utf8",
 };
