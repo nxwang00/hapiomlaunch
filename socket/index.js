@@ -1,13 +1,10 @@
 const server = require("http").createServer();
-const io = require("socket.io")(
-  server,
-  {
-    cors: {
-      origin: "*",
-    },
+const io = require("socket.io")(server, {
+  cors: {
+    origin: "*",
   },
-  { path: "/nodejs/socket.io" }
-);
+  path: "/nodesock/",
+});
 var mysql = require("mysql");
 
 const PORT = 4000;
