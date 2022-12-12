@@ -3,7 +3,6 @@ const io = require("socket.io")(server, {
   cors: {
     origin: "*",
   },
-  path: "/nodesock/socket.io/",
 });
 var mysql = require("mysql");
 
