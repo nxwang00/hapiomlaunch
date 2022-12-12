@@ -106,12 +106,12 @@ class LoginController extends Controller
                     return Redirect('user-login')->with('error','Your account has been blocked please contact hapiom.');
                 }
             }
-            else if ( User::where('id',Auth::user()->customer_id )->value('block') == 0 && $role_id == 3)
-            {
-                Session::flush();
-                Auth::logout();
-                return Redirect('user-login')->with('error','Your account has been blocked please contact hapiom.');
-            }
+            // else if ( User::where('id',Auth::user()->customer_id )->value('block') == 0 && $role_id == 3)
+            // {
+            //     Session::flush();
+            //     Auth::logout();
+            //     return Redirect('user-login')->with('error','Your account has been blocked please contact hapiom.');
+            // }
             // else if ($role_id == 2 && Auth::user()->edate < date('Y-m-d') ) {
             //     Session::flush();
             //     Auth::logout();
@@ -165,7 +165,7 @@ class LoginController extends Controller
         }
 
         flashWebResponse('message', 'Registration successfully.! please login your credentials.');
-        
+
         return back();
         // return back()->withErrors(['These credentials do not match our records.']);
         // return redirect("dashboard")->withSuccess('You have signed-in');
