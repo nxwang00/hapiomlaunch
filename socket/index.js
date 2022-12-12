@@ -80,7 +80,7 @@ io.on("connection", (socket) => {
     let senderId = data.senderId;
     let message = data.body;
     MysqlConnect.query(
-      "INSERT INTO messages SET ufrom=?, uto=?, message=?",
+      "INSERT INTO messages SET user_id=?, receiver_id=?, message=?",
       [senderId, receiverId, message],
       (err, res) => {
         if (err) {

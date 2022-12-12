@@ -306,7 +306,6 @@
 
 				$("#sendMsgTxt").val("");
 
-				console.log("receiver id----", receiverId);
 				socket.emit('newMessage', {
 					body: msgText,
 					senderId: userId,
