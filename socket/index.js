@@ -76,8 +76,8 @@ io.on("connection", (socket) => {
 
   // Listen for new messages
   socket.on(NEW_MESSAGE, (data) => {
-    let receiverId = data.receiver;
-    let senderId = data.sender;
+    let receiverId = data.receiverId;
+    let senderId = data.senderId;
     let message = data.body;
     console.log("data::", data);
     // MysqlConnect.query(
