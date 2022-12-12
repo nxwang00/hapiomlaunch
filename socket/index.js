@@ -79,7 +79,7 @@ io.on("connection", (socket) => {
     let receiverId = data.receiver;
     let senderId = data.sender;
     let message = data.body;
-    console.log("message::", message);
+    console.log("data::", data);
     // MysqlConnect.query(
     //   "INSERT INTO messages SET ufrom=?, uto=?, message=?",
     //   [senderId, receiverId, message],
