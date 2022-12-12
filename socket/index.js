@@ -79,19 +79,16 @@ io.on("connection", (socket) => {
     let receiverId = data.receiverId;
     let senderId = data.senderId;
     let message = data.body;
-    console.log("data::", data);
-    // MysqlConnect.query(
-    //   "INSERT INTO messages SET ufrom=?, uto=?, message=?",
-    //   [senderId, receiverId, message],
-    //   (err, res) => {
-    //     if (err) {
-    //       console.log(err);
-    //     }
-    //   }
-    // );
+    MysqlConnect.query(
+      "INSERT INTO messages SET ufrom=?, uto=?, message=?",
+      [senderId, receiverId, message],
+      (err, res) => {
+        if (err) {
+          console.log(err);
+        }
+      }
+    );
     for (let s of sockets) {
-      console.log(s.userId);
-      console.log("receiver id::::", receiverId);
       if (s.userId === receiverId) {
         s.emit(NEW_MESSAGE, data);
       }
