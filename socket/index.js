@@ -91,7 +91,7 @@ io.on("connection", (socket) => {
     // );
     for (let s of sockets) {
       console.log(s.userId);
-      console.log("receiver id::::", s.userId);
+      console.log("receiver id::::", receiverId);
       if (s.userId === receiverId) {
         s.emit(NEW_MESSAGE, data);
       }
