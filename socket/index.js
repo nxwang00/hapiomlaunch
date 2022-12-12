@@ -81,15 +81,15 @@ io.on("connection", (socket) => {
     let receiverId = data.receiver;
     let senderId = data.sender;
     let message = data.body;
-    MysqlConnect.query(
-      "INSERT INTO messages SET ufrom=?, uto=?, message=?",
-      [senderId, receiverId, message],
-      (err, res) => {
-        if (err) {
-          console.log(err);
-        }
-      }
-    );
+    // MysqlConnect.query(
+    //   "INSERT INTO messages SET ufrom=?, uto=?, message=?",
+    //   [senderId, receiverId, message],
+    //   (err, res) => {
+    //     if (err) {
+    //       console.log(err);
+    //     }
+    //   }
+    // );
     for (let s of sockets) {
       if (s.userId == receiverId) {
         s.emit(NEW_MESSAGE, data);
