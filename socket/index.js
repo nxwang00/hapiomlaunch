@@ -90,8 +90,9 @@ io.on("connection", (socket) => {
     //   }
     // );
     for (let s of sockets) {
+      console.log(s.userId);
+      console.log("receiver id::::", s.userId);
       if (s.userId === receiverId) {
-        console.log("receiver id::::", s.userId);
         s.emit(NEW_MESSAGE, data);
       }
     }
