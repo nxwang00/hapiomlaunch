@@ -9,29 +9,39 @@ NOTE: This file contains the styling for responsive Template.
 }
 @media (min-width:1500px) {
 	body.sidebar-main .iq-sidebar { width: 80px; }
+	#chat-msg {margin-left: 325px; display: block;}
 	body.sidebar-main .iq-sidebar .iq-sidebar-menu .iq-menu li a span, body.sidebar-main .iq-sidebar-logo a span, body.sidebar-main .iq-sidebar-menu .iq-menu li a .badge { opacity: 0; display: none; transition: all 0.45s ease 0s; }
 	.sidebar-main .iq-sidebar .iq-submenu li a { font-size: 0; }
+	/* .right-sidebar-mini { transform: translateX(calc(10% + -1em)); }
+	.right-sidebar-toggle { z-index: -1; opacity: 0;margin-left: 0;transition: all 0.45s ease 0s; }
+	.right-sidebar-mini:hover .right-sidebar-toggle { opacity: 1;margin-left: -44px;transition: all 0.45s ease 0s; }
+	.right-sidebar-mini.right-sidebar .right-sidebar-toggle {margin-left: -44px;}
+	.right-sidebar-mini.right-sidebar { transform: translateX(calc(111% + -2em)); }
+	.right-sidebar-mini.right-sidebar .right-sidebar-toggle { opacity: 1; } */
+	body.right-sidebar-close footer {width: calc(100vw - 260px);}
+	body.sidebar-main .iq-footer {margin-left: 80px; width: calc(100vw - 335px);}
+	body.sidebar-main.right-sidebar-close .iq-footer { width: calc(100vw - 90px);}
+}
+@media (min-width:1300px) {
 	.right-sidebar-mini { transform: translateX(calc(10% + -1em)); }
 	.right-sidebar-toggle { z-index: -1; opacity: 0;margin-left: 0;transition: all 0.45s ease 0s; }
 	.right-sidebar-mini:hover .right-sidebar-toggle { opacity: 1;margin-left: -44px;transition: all 0.45s ease 0s; }
 	.right-sidebar-mini.right-sidebar .right-sidebar-toggle {margin-left: -44px;}
 	.right-sidebar-mini.right-sidebar { transform: translateX(calc(111% + -2em)); }
 	.right-sidebar-mini.right-sidebar .right-sidebar-toggle { opacity: 1; }
-	body.right-sidebar-close footer {width: calc(100vw - 260px);}
-	body.sidebar-main .iq-footer {margin-left: 80px; width: calc(100vw - 335px);}
-	body.sidebar-main.right-sidebar-close .iq-footer { width: calc(100vw - 90px);}
 }
 @media (min-width:1300px) and (max-width:1499px) {
 	.iq-sidebar { width: 80px; }
+	#chat-msg {margin-left: 150px; display: block;}
 	body.sidebar-main .iq-sidebar { width: 250px; }
 	.iq-sidebar .iq-sidebar-menu .iq-menu li a span, .iq-sidebar-logo a span, .iq-sidebar-menu .iq-menu li a .badge { opacity: 0; display: none; transition: all 0.45s ease 0s; }
 	.iq-sidebar .iq-submenu li a { font-size: 0; }
 	body.sidebar-main .iq-sidebar .iq-sidebar-menu .iq-menu li a span, body.sidebar-main .iq-sidebar-logo a span, body.sidebar-main .iq-sidebar-menu .iq-menu li a .badge { opacity: 1; display: block; transition: all 0.45s ease 0s; }
 	.sidebar-main .iq-sidebar .iq-submenu li a { font-size: 14px; }
-	.right-sidebar-mini { transform: translateX(calc(111% + -8em)); }
+	/* .right-sidebar-mini { transform: translateX(calc(111% + -8em)); }
 	.right-sidebar-mini.right-sidebar { transform: translateX(calc(10% + -1em)); }
 	.right-sidebar-mini .media-body{opacity: 0;}
-	.right-sidebar-mini.right-sidebar .media-body { opacity: 1; }
+	.right-sidebar-mini.right-sidebar .media-body { opacity: 1; } */
 	.without-right-sidebar .iq-footer { width: calc(100vw - 90px);margin-left: 80px;}
 	.iq-footer {margin-left: 80px; width: calc(100vw - 163px);}
 
@@ -46,6 +56,7 @@ NOTE: This file contains the styling for responsive Template.
 	.animation-card .an-img { margin-top: 0; }
 }
 @media(max-width:1299px) {
+	#chat-msg {display: none;}
 	.iq-circle-progressbar .percent { font-size: 1.3rem !important; }
 	.iq-circle-progressbar svg { width: 80px !important; height: 80px !important; }
 	.iq-circle-progressbar { margin: 0 auto; width: 80px !important; height: 80px !important; }

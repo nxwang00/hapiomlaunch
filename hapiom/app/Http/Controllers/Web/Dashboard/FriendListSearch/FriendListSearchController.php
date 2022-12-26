@@ -33,7 +33,7 @@ class FriendListSearchController extends Controller
     {
     	if (request()->ajax()) {
             $msg = $request->persist()->getMsg();
-            return response()->json(['status' => 'success', 'title' => 'Friend request!', 'text' => 'Friend request sent successfully.!']);
+            return response()->json(['status' => 'success', 'title' => 'Friend request!', 'text' => $msg]);
         }
         return errorWebResponse();
     }

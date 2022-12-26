@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Web\Dashboard\Groupmaster;
 use App\Models\Groupmaster;
 use App\Models\GroupMasterAdmin;
+use App\Models\GroupUser;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Storage;
 use Auth;
@@ -71,7 +72,14 @@ class StoreRequest extends FormRequest
         foreach ($users as $user) {
            $data[] = ['groupmaster_id' => $this->groupmaster->id , 'user_id' => $user];
         }
+        $groupUserData = [
+            'group_id' => $this->groupmaster->id,
+            'user_id' => Auth::user()->id,
+            'status' => 1
+
+        ];
         GroupMasterAdmin::insert($data);
+        GroupUser::create($groupUserData);
         return $this;
     }
 

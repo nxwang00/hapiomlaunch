@@ -17,6 +17,8 @@ use App\Models\PaymentSetting;
 use App\Models\GroupMasterAdmin;
 use App\Models\Payment as PaymentModel;
 use Stripe\StripeClient;
+use App\Models\Event;
+use App\Models\Photo;
 
 class UserGroupController extends Controller
 {
@@ -25,10 +27,9 @@ class UserGroupController extends Controller
     {
         $groups = DB::table('groupmasters')
                     ->join('group_master_admins', 'groupmasters.id', '=', 'group_master_admins.groupmaster_id')
-                    ->where('group_master_admins.user_id', Auth::user()->customer_id)
                     ->where('groupmasters.status', 1)
+                    ->select('groupmasters.*', 'group_master_admins.user_id', 'group_master_admins.groupmaster_id')
                     ->get();
-
         $friendIds = Friendlist::select('friend_id')->where(['user_id' => Auth::user()->id, 'friendstatus' => 1])->pluck('friend_id');
         foreach($groups as $group)
         {
@@ -65,6 +66,14 @@ class UserGroupController extends Controller
         return "ok";
     }
 
+    public function showGroupInfo($id) {
+        $groupUsers = GroupUser::where('group_id', $id)->where('status', 1)->get();
+        $groupEvents = Event::where('group_id', $id)->where('status', 1)->get();
+        $groupPhotos = Photo::where('group_id', $id)->get();
+
+        return view('dashboard.pages.usergroup.groupDetail', compact('groupUsers', 'groupEvents', 'groupPhotos'));
+    }
+
     public function leaveGroup(Request $request)
     {
         $groupId = $request->input('group_id');
@@ -82,10 +91,10 @@ class UserGroupController extends Controller
 
     public function viewDetail($id)
     {
-        $group = Groupmaster::find($id);
-        $groupAdmins = GroupMasterAdmin::where('groupmaster_id', $group->id)->get();
-        $groupUsers = GroupUser::where('group_id', $group->id)->where('status', 1)->get();
-        $groupUser = GroupUser::where('group_id', $group->id)->where('user_id', Auth::id())->first();
+        $group = Groupmaster::findOrFail($id);
+        $groupAdmins = GroupMasterAdmin::where('groupmaster_id', $id)->get();
+        $groupUsers = GroupUser::where('group_id', $id)->where('status', 1)->get();
+        $groupUser = GroupUser::where('group_id', $id)->where('user_id', Auth::id())->first();
 
         return view('dashboard.pages.usergroup.detail', compact('group', 'groupAdmins', 'groupUsers', 'groupUser'));
     }
@@ -214,5 +223,14 @@ class UserGroupController extends Controller
             ->where('users.name', 'like', "%$queryTerm%")
             ->get();
         return $groupUsers;
+    }
+
+    public function approve($id)
+    {
+        $groupUser = GroupUser::find($id);
+        $groupUser->status = 1;
+        $groupUser->save();
+
+        return response()->json('ok');
     }
 }

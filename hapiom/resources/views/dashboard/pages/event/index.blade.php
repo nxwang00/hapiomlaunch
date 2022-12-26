@@ -162,7 +162,7 @@
                                                         <div class="col-sm-12 col-md-6">
                                                             <div class="form-group">
                                                                 <label for="event_name">Image:</label>
-                                                                <div class="custom-file">
+                                                                <div class="custom-file" style="z-index: 0;">
                                                                     <input type="file" class="custom-file-input" id="event_image_{{ $event->id }}" name="event_image" img_url="{{ $event->image }}">
                                                                     <label class="group-image-label custom-file-label form-control" for="event_image_{{ $event->id }}" style="line-height: 30px !important;"></label>
                                                                 </div>
@@ -254,7 +254,7 @@
                         <div class="col-sm-12 col-md-6">
                             <div class="form-group">
                                 <label for="event_name">Image:</label>
-                                <div class="custom-file">
+                                <div class="custom-file" style="z-index: 0;">
                                     <input type="file" class="custom-file-input" id="event_image" name="event_image" required>
                                     <label class="group-image-label custom-file-label form-control" for="event_image" style="line-height: 30px !important;"></label>
                                 </div>

@@ -22,7 +22,7 @@
                         <div style="max-width: 80%">
                            <div class="user-img img-fluid d-flex">
                               <h6 class="mr-2">By</h6>
-                              @if(isset($recentNotification->senderInfo->profile_image))
+                              @if(isset($recentNotification->senderInfo->profile_image) && file_exists('images/profile/'.$recentNotification->senderInfo->profile_image))
                                  <img src="{{ url('images/profile/'.$recentNotification->senderInfo->profile_image) }}" alt="story-img" class="rounded-circle avatar-20">
                               @else
                                  <img src="{{ url('assets/dashboard/img/default-avatar-1.png') }}" alt="profile-img" class="rounded-circle avatar-20" />
@@ -60,7 +60,7 @@
                         <div style="max-width: 80%">
                            <div class="user-img img-fluid d-flex">
                               <h6 class="mr-2">By</h6>
-                              @if(isset($notification->senderInfo->profile_image))
+                              @if(isset($notification->senderInfo->profile_image) && file_exists('images/profile/'.$notification->senderInfo->profile_image))
                                  <img src="{{ url('images/profile/'.$notification->senderInfo->profile_image) }}" alt="story-img" class="rounded-circle avatar-20">
                               @else
                                  <img src="{{ url('assets/dashboard/img/default-avatar-1.png') }}" alt="profile-img" class="rounded-circle avatar-20" />

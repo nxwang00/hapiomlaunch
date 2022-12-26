@@ -12,7 +12,7 @@ use App\Events\MessageSent;
 use App\Models\Friendlist;
 use App\Models\Userinfo;
 use Redirect;
-
+use DB;
 class ChatController extends Controller
 {
 
@@ -20,21 +20,47 @@ class ChatController extends Controller
     {
         // $users = $this->getconversationUsers();
         // when using the link in header message alert panel
+        $chatSearch = $request->query('chat-search');
         $partner = $request->user;
-
-        $friends = Friendlist::where('user_id', Auth::id())->get();
         $users = [];
-        foreach($friends as $friend)
-        {
-            $user = User::find($friend->friend_id);
-            $userinfo = Userinfo::where('user_id', $friend->friend_id)->first();
-            $user->profile_image = isset($userinfo) ? $userinfo->profile_image : "";
+        if ($chatSearch) {
+            $friends = Friendlist::where('user_id', Auth::id())->get();
+       
+            foreach($friends as $friend)
+            {
+                $user = DB::table('users')
+                ->where(function ($query) use($chatSearch) {
+                    $query->where('name', 'LIKE', "%{$chatSearch}%")
+                            ->orWhere('email', 'LIKE', "%{$chatSearch}%")
+                            ->orWhere('company_name', 'LIKE', "%{$chatSearch}%");
+                })
+                ->first();
+                if ($user->id !== $friend->friend_id) {
+                    continue;
+                }
+                $userinfo = Userinfo::where('user_id', $friend->friend_id)->first();
+                $user->profile_image = isset($userinfo) ? $userinfo->profile_image : "";
 
-            $unread_messages = Message::where('user_id', $friend->friend_id)->where('receiver_id', Auth::id())->where('is_seen', 0)->get();
-            $user->unreads = count($unread_messages);
-            array_push($users, $user);
+                $unread_messages = Message::where('user_id', $friend->friend_id)->where('receiver_id', Auth::id())->where('is_seen', 0)->get();
+                $user->unreads = count($unread_messages);
+                
+                array_push($users, $user);
+            }
+
+        } else {
+            $friends = Friendlist::where('user_id', Auth::id())->get();
+       
+            foreach($friends as $friend)
+            {
+                $user = User::find($friend->friend_id);
+                $userinfo = Userinfo::where('user_id', $friend->friend_id)->first();
+                $user->profile_image = isset($userinfo) ? $userinfo->profile_image : "";
+
+                $unread_messages = Message::where('user_id', $friend->friend_id)->where('receiver_id', Auth::id())->where('is_seen', 0)->get();
+                $user->unreads = count($unread_messages);
+                array_push($users, $user);
+            }
         }
-
         $otherUser = new User();
         $channelName  = null;
         return view('dashboard.pages.chat.index', compact('users','otherUser','channelName', 'partner'));

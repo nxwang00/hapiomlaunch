@@ -30,7 +30,7 @@
           @foreach($groupUsers as $groupUser)
             <li class="d-flex align-items-center">
               <div class="user-img img-fluid">
-                @if(isset($groupUser->groupUserName->userInfo->profile_image))
+                @if(isset($groupUser->groupUserName->userInfo->profile_image) && file_exists('images/profile/'. $groupUser->groupUserName->userInfo->profile_image))
                   <img src="{{ url('images/profile/',$groupUser->groupUserName->userInfo->profile_image) }}" alt="story-img" class="rounded-circle avatar-40">
 				      	@else
 									<img src="{{ url('assets/dashboard/img/default-avatar.png') }}" alt="profile-img" class="rounded-circle avatar-40" />
@@ -59,7 +59,7 @@
           @foreach($groupEvents as $groupEvent)
             <li class="d-flex align-items-center">
               <div class="user-img img-fluid">
-                @if(isset($groupEvent->image))
+                @if(isset($groupEvent->image) && file_exists('images/event/'. $groupEvent->image))
                   <img src="{{ url('images/event/', $groupEvent->image) }}" class="rounded" alt="event image" style="object-fit:cover" width="200" height="150">
 								@endif
               </div>

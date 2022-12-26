@@ -78,7 +78,7 @@
 					</div>
 					<div class="top-header-author">
 						<a href="#" class="author-thumb">
-							@if(isset(Auth::user()->userInfo->profile_image))
+							@if(isset(Auth::user()->userInfo->profile_image) && file_exists('images/profile/'. Auth::user()->userInfo->profile_image))
 							<img loading="lazy" src="{{ url('images/profile/',Auth::user()->userInfo->profile_image) }}" alt="author" width="124" height="124">
 							@else
 							<img loading="lazy" src="{{ url('assets/dashboard/img/noimage.jpg') }}" alt="author" width="124" height="124">

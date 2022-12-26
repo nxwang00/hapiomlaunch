@@ -3,6 +3,7 @@
 .iq-profile-avatar.status-info:before { background-color: #17a2b8; }
 .iq-profile-avatar.status-danger:before { background-color: #ea5455; }
 .bg-blue { background-color: #468bd8 !important; }
+.bg-pink { background-color: #F10EEE !important; }
 .dash-hover-gradient { background-color: #fff; min-height: 200px; }
 .dash-hover-gradient:hover { cursor: pointer; background: #0084ff; color: #fff; }
 .dash-hover-scale { min-height: 200px; transition: all 200ms ease-in-out; }

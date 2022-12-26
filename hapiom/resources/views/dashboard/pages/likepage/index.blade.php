@@ -35,7 +35,7 @@
 														<div class="profile-detail">
 															<div class="d-flex flex-wrap">
 																<div class="col-md-6 pr-4">
-																	@if(isset($likedUsers[$key]->userInfo->profile_image))
+																	@if(isset($likedUsers[$key]->userInfo->profile_image) && file_exists('images/profile/'. $likedUsers[$key]->userInfo->profile_image))
 																	<img src="{{ url('images/profile/',$likedUsers[$key]->userInfo->profile_image) }}" alt="profile-img" class="avatar-60 img-fluid rounded-circle" />
 																	@else
 																	<img src="{{ url('assets/dashboard/img/default-avatar.png') }}" alt="profile-img" class="avatar-60 img-fluid rounded-circle" />

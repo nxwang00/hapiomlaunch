@@ -41,7 +41,7 @@
                 <div class="row">                  
                   <div class="form-group col-md-6">
                     <label for="email">Image:</label>
-                     <div class="custom-file">
+                     <div class="custom-file" style="z-index: 0;">
                         <input type="file" class="custom-file-input" id="customFile" name="image" required="">
                         <label class="custom-file-label" for="customFile">Choose file</label>
                      </div>

@@ -51,7 +51,7 @@
                                   <div class="form-group col-md-6">
                                      <label for="pwd">Type:</label>
                                      <select class="form-select form-control group_type" name="group_type" id="group_type">
-                                      <option value="0">Free</option>
+                                      <option value="0">Basic</option>
                                       <option value="1">Paid</option>
                                      </select>
                                   </div>

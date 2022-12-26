@@ -27,14 +27,14 @@
 						<div class="iq-card-body" data-toggle="modal" data-target="#post-modal">
 							<div class="d-flex align-items-center">
 								<div class="user-img">
-									@if(isset($userinfo->profile_image))
+									@if(isset($userinfo->profile_image) && file_exists('images/profile'. $userinfo->profile_image))
 									<img src="{{ url('images/profile',$userinfo->profile_image ) }}" alt="userimg" class="avatar-60 rounded-circle">
 									@else
 									<img src="{{url('assets/dashboard/img/default-avatar.png')}}" alt="userimg" class="avatar-60 rounded-circle">
 									@endif
 								</div>
 								<form class="post-text ml-3 w-100" action="javascript:void();">
-									<input type="text" class="form-control rounded" placeholder="Write something here..." style="border:none;">
+									<input type="text" class="form-control" placeholder="What's on your mind?" style="border:none;">
 								</form>
 							</div>
 							<hr>
@@ -49,28 +49,30 @@
 										<h5 class="modal-title" id="post-modalLabel">Create Post</h5>
 										<button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="ri-close-fill m-0"></i></button>
 									</div>
-									<form method="post" action="{{ route('newsfeed-create') }}" enctype="multipart/form-data">
+									<form method="post" action="{{ route('newsfeed-create') }}" enctype="multipart/form-data" id="post_upload_Form">
 										@csrf
 										<div class="modal-body">
 											<div class="d-flex align-items-center">
 												<div class="user-img">
-													@if(isset($userinfo->profile_image))
+													@if(isset($userinfo->profile_image) && file_exists('images/profile'. $userinfo->profile_image))
 													<img src="{{ url('images/profile',$userinfo->profile_image ) }}" alt="userimg" class="avatar-60 rounded-circle">
 													@else
 													<img src="{{url('assets/dashboard/img/default-avatar.png')}}" alt="userimg" class="avatar-60 rounded-circle">
 													@endif
 												</div>
-
-												<input type="text" class="form-control rounded" name="textpost" placeholder="Write something here..." style="border:none;">
-
-												<input type="hidden" name="group_id" value="{{ @$group_id }}">
-
+												<div class="caption ml-2">
+													<h5 class="mb-0 line-height">{{ ucwords(Auth::user()->name) }}</h5>
+												</div>
 											</div>
+											<input type="text" class="form-control mt-3" name="textpost" placeholder="What's on your mind?" style="border-radius:20px;">
+
+											<input type="hidden" name="group_id" value="{{ @$group_id }}">
 											<hr>
 											<ul class="d-flex flex-wrap align-items-center list-inline m-0 p-0">
-												<li class="col-md-6 mb-3 ">
+												<li class="col-md-6 mb-3 d-flex">
 													<div class="iq-bg-primary rounded p-2 pointer mr-3 image_upload1"><img src="{{ url('assets/dashboard/images/small/07.png') }}" alt="icon" class="img-fluid "> Photo/Video</div>
 													<input class="d-none" id="my_file1" type="file" name="image[]" multiple>
+													<div id="preview_embed"></div>
 												</li>
 											</ul>
 											<hr>
@@ -99,7 +101,7 @@
 							<div class="user-post-data">
 								<div class="d-flex flex-wrap">
 									<div class="media-support-user-img mr-3">
-										@if(isset($result->userImageByPost->profile_image))
+										@if(isset($result->userImageByPost->profile_image) && file_exists('images/profile'. $result->userImageByPost->profile_image))
 										<img class="rounded-circle img-fluid" src="{{ url('images/profile',$result->userImageByPost->profile_image) }}" alt="">
 										@else
 										<img class="rounded-circle img-fluid" src="{{url('assets/dashboard/img/default-avatar.png')}}" alt="">
@@ -157,18 +159,22 @@
 								<div class="d-flex">
 									@if($result->NewsfeedGallaries->count() == 1)
 									<div class="col-md-12 newsfeed-update-img-{{ $result->id }}">
-									@foreach($result->NewsfeedGallaries as $imageValue)
-									<div class="col-md-12">
-										<a href="{{ route('newsfeed-show', $result->id) }}"><img src="{{ url('images/newsfeed/'.$imageValue->image) }}" alt="post-image" class="img-fluid rounded w-100"></a>
-									</div>
-									@endforeach
+										@foreach($result->NewsfeedGallaries as $imageValue)
+										@if (isset($imageValue->image) && file_exists('images/newsfeed/'.$imageValue->image))
+										<div class="col-md-12">
+											<a href="{{ route('newsfeed-show', $result->id) }}"><img src="{{ url('images/newsfeed/'.$imageValue->image) }}" alt="post-image" class="img-fluid rounded w-100" style="height: 360px;"></a>
+										</div>
+										@endif
+										@endforeach
 									</div>
 									@else
 									<div class="col-md-6 row m-0 p-0 newsfeed-update-img-{{ $result->id }}">
 										@foreach($result->NewsfeedGallaries as $imageValue)
+										@if (isset($imageValue->image) && file_exists('images/newsfeed/'.$imageValue->image))
 										<div class="col-sm-12">
-											<a href="{{ route('newsfeed-show', $result->id) }}"><img src="{{ url('images/newsfeed/'.$imageValue->image) }}" alt="post-image" class="img-fluid rounded w-100"></a>
+											<a href="{{ route('newsfeed-show', $result->id) }}"><img src="{{ url('images/newsfeed/'.$imageValue->image) }}" alt="post-image" class="img-fluid rounded w-100" style="height: 360px;"></a>
 										</div>
+										@endif
 										@endforeach
 									</div>
 									@endif
@@ -183,9 +189,29 @@
 												<div class="dropdown">
 													<span class="dropdown-toggle">
 														<a href="javascript:void(0);" class="likePost" newsfeed_id="{{ $result->id }}" route="{{ route('newsfeed-like')}}" user_id="{{ $result->user_id }}" likes_id="{{ Auth::user()->id }}">
-															<img src="{{ url('assets/dashboard/images/icon/01.png') }}" class="img-fluid" alt="">
-
+															@if($result->NewsfeedLike->count() > 0)
+															@php $hasMe = null; @endphp
+															@foreach($result->NewsfeedLike as $newlike)
+															@if($newlike->NewsfeedUser->id !== Auth::user()->id)
+															@php $hasMe = null; @endphp
+															@continue;
+															@else
+															@php $hasMe = true; @endphp
+															@if($newlike->face_icon)
+															<input type="hidden" value="{{ $newlike->face_icon }}" class="facemocion" />
+															@else
+															<input type="hidden" value="gusta" class="facemocion" />
+															@endif
+															@endif
+															@endforeach
+															@if(!$hasMe)
+															<input type="hidden" value="gusta" class="facemocion" />
+															@endif
+															@else
+															<input type="hidden" value="gusta" class="facemocion" />
+															@endif
 														</a>
+
 													</span>
 												</div>
 											</div>
@@ -215,22 +241,12 @@
 												<span class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="button">
 													{{ $result->NewsfeedComment->count() }} Comment
 												</span>
-												<div class="dropdown-menu">
-													@if($result->NewsfeedLike->count() > 0)
-													@php $ucomment = 0; @endphp
-													@foreach($result->NewsfeedComment as $comment)
-													@if($ucomment < 7) <a class="dropdown-item" href="#">{{ ucwords($comment->NewsfeedUser->name) }}</a>
-														@endif
-														@php $ucomment = $ucomment + 1; @endphp
-														@endforeach
-														@endif
-												</div>
 											</div>
 										</div>
 									</div>
 									<div class="share-block d-flex align-items-center feather-icon mr-3 comment_btn" id="{{ $result->id}}">
-										<a href="javascript:void();"><i class="ri-share-line"></i>
-											<span class="ml-1">Add Comment</span></a>
+										<a href="javascript:void();" style="font-size: 18px;"><i class="ri-chat-2-line"></i>
+											<span class="ml-1">Comment</span></a>
 									</div>
 								</div>
 								<hr>
@@ -243,7 +259,7 @@
 									<li class="mb-2 reply_comment_add_{{ $comment->id }}" id="comment-el-{{ $comment->id }}">
 										<div class="d-flex flex-wrap justify-content-start">
 											<div class="user-img">
-												@if(isset($comment->profileImage->profile_image))
+												@if(isset($comment->profileImage->profile_image) && file_exists('images/profile'. $comment->profileImage->profile_image))
 												<img src="{{ url('images/profile',$comment->profileImage->profile_image) }}" alt="userimg" class="avatar-35 rounded-circle img-fluid">
 												@else
 												<img src="{{url('assets/dashboard/img/default-avatar.png')}}" alt="userimg" class="avatar-35 rounded-circle img-fluid">
@@ -284,7 +300,7 @@
 																</div>
 															</div>
 														</a>
-														<a class="dropdown-item p-3 delete-comment" href="javascript:void();" route="{{ route('delete-comment', $comment->id)}}" comment_id="{{ $comment->id }}">
+														<a class="dropdown-item p-3 delete-comment" href="javascript:void();" route="{{ route('delete-comment', $comment->id)}}" comment_id="{{ $comment->id }}" newsfeed_id="{{ $comment->newsfeed_id }}">
 															<div class="d-flex align-items-top">
 																<div class="icon font-size-20"><i class="ri-delete-back-2-line"></i></div>
 																<div class="data ml-2">
@@ -307,9 +323,9 @@
 									@endforeach
 								</ul>
 								<form class="comment-text align-items-center mt-3 comment-form comment_add_{{$result->id}}" route="{{ route('comment_add')}}" user_id="{{ Auth::user()->id }}" newsfeed_id="{{ $result->id }}" id="">
-									<textarea class="form-control rounded comment-text-{{ $result->id }}" id="" name="comment" style="width: 80%;" rows="2" required=""></textarea>
-									<button class="badge badge-primary mt-2" id="submit" type="submit">Post</button>
-									<button class="badge badge-secondary mt-2 ml-2 comment_btn" id="{{$result->id}}">Cancel</button>
+									<div class="comment-box comment-text-{{ $result->id }}" id="" contentEditable="true" name="comment" onkeydown="doComment(event, {{ $result->id }})"></div>
+									<!-- <button class="badge badge-primary mt-2" id="submit" type="submit">Post</button>
+									<button class="badge badge-secondary mt-2 ml-2 comment_btn" id="{{$result->id}}">Cancel</button> -->
 								</form>
 							</div>
 							<?php
@@ -339,11 +355,15 @@
 					<div class="iq-card-body">
 						<ul class="media-story m-0 p-0">
 							@foreach($friends as $value)
-							<li class="d-flex mb-4 align-items-center active">
-								@if (isset($value->userInfo->profile_image))
-								<img src="{{url('images/profile/'.$value->userInfo->profile_image)}}" class="rounded-circle img-fluid" alt="user">
+							<li class="d-flex mb-4 align-items-center active add-friend-{{ $value->id }}">
+								@if (isset($value->userInfo->profile_image) && file_exists('images/profile/'. $value->userInfo->profile_image))
+								<a href="{{ route('user-profile',encrypt($value->id)) }}">
+									<img src="{{url('images/profile/', $value->userInfo->profile_image)}}" class="rounded-circle img-fluid" alt="user">
+								</a>
 								@else
-								<img src="{{url('assets/dashboard/img/default-avatar.png')}}" class="rounded-circle img-fluid mr-3" alt="user">
+								<a href="{{ route('user-profile',encrypt($value->id)) }}">
+									<img src="{{url('assets/dashboard/img/default-avatar.png')}}" class="rounded-circle img-fluid mr-3" alt="user">
+								</a>
 								@endif
 								<div class="stories-data ml-3">
 									<h5><a href="{{ route('user-profile',encrypt($value->id)) }}">{{ $value->name }}</a></h5>
@@ -352,10 +372,10 @@
 							</li>
 							@endforeach
 						</ul>
-						<a href="#" class="btn btn-primary d-block mt-3">See All</a>
+						<a href="{{ route('friendlist') }}" class="btn btn-primary d-block mt-3">See All</a>
 					</div>
 				</div>
-				<div class="iq-card">
+				<!-- <div class="iq-card">
 					<div class="iq-card-header d-flex justify-content-between">
 						<div class="iq-header-title">
 							<h4 class="card-title">Events</h4>
@@ -393,7 +413,7 @@
 							</li>
 						</ul>
 					</div>
-				</div>
+				</div> -->
 				<div class="iq-card">
 					<div class="iq-card-header d-flex justify-content-between">
 						<div class="iq-header-title">
@@ -401,22 +421,55 @@
 						</div>
 					</div>
 					<div class="iq-card-body">
+						@if($acceptedFriends && count($acceptedFriends) > 0)
 						<ul class="media-story m-0 p-0">
-							<li class="d-flex mb-4 align-items-center">
-								<img src="{{ url('assets/dashboard/images/user/01.jpg') }}" alt="story-img" class="rounded-circle img-fluid">
+							@foreach($acceptedFriends as $value)
+							@php
+							if ($value->userInfo) {
+							$birthMonth = Carbon\Carbon::parse($value->userInfo->dob)->format('m');
+							$birthDate = Carbon\Carbon::parse($value->userInfo->dob)->format('d');
+							$currentMonth = Carbon\Carbon::now()->format('m');
+							$currentDate = Carbon\Carbon::now()->format('d');
+							$birthDay = Carbon\Carbon::parse($value->userInfo->dob);
+							}
+							@endphp
+							@if ($value->userInfo)
+							@if(($birthMonth == $currentMonth) && ($birthDate > $currentDate) )
+							<li class="d-flex mb-4 align-items-center active">
+								@if(isset($value->userInfo->profile_image) && file_exists('images/profile/' . $value->userInfo->profile_image))
+								<a href="{{ route('user-profile',encrypt($value->id)) }}">
+									<img src="{{ url('images/profile/',$value->userInfo->profile_image) }}" alt="profile-img" class="rounded-circle img-fluid" />
+								</a>
+								@else
+								<a href="{{ route('user-profile',encrypt($value->id)) }}">
+									<img src="{{ url('assets/dashboard/img/default-avatar.png') }}" alt="profile-img" class="rounded-circle img-fluid" />
+								</a>
+								@endif
 								<div class="stories-data ml-3">
-									<h5>Anna Sthesia</h5>
-									<p class="mb-0">Today</p>
+									<h5><a href="{{ route('user-profile',encrypt($value->id)) }}">{{ $value->name }}</a></h5>
+									<p class="mb-0">{{ $birthDay->format('Y-m-d') }}</p>
 								</div>
 							</li>
-							<li class="d-flex align-items-center">
-								<img src="{{ url('assets/dashboard/images/user/02.jpg') }}" alt="story-img" class="rounded-circle img-fluid">
+							@else
+							<h5 class="text-center">No upcoming birthday.</h5>
+							@endif
+							@else
+							<h5 class="text-center">He needs to add his profile.</h5>
+							<li class="d-flex mb-4 align-items-center active">
+								<a href="{{ route('user-profile',encrypt($value->id)) }}">
+									<img src="{{ url('assets/dashboard/img/default-avatar.png') }}" alt="profile-img" class="rounded-circle img-fluid" />
+								</a>
 								<div class="stories-data ml-3">
-									<h5>Paul Molive</h5>
-									<p class="mb-0">Tomorrow</p>
+									<h5><a href="{{ route('user-profile',encrypt($value->id)) }}">{{ $value->name }}</a></h5>
+									<p class="mb-0">No birthday</p>
 								</div>
 							</li>
+							@endif
+							@endforeach
 						</ul>
+						@else
+						<h5 class="text-center">No friends accepted.</h5>
+						@endif
 					</div>
 				</div>
 				<div class="iq-card">
@@ -424,45 +477,62 @@
 						<div class="iq-header-title">
 							<h4 class="card-title">Suggested Pages</h4>
 						</div>
-						<div class="iq-card-header-toolbar d-flex align-items-center">
-							<div class="dropdown">
-								<span class="dropdown-toggle" id="dropdownMenuButton01" data-toggle="dropdown" aria-expanded="false" role="button">
-									<i class="ri-more-fill"></i>
-								</span>
-								<div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton01" style="">
-									<a class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a>
-									<a class="dropdown-item" href="#"><i class="ri-delete-bin-6-fill mr-2"></i>Delete</a>
-									<a class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a>
-									<a class="dropdown-item" href="#"><i class="ri-printer-fill mr-2"></i>Print</a>
-									<a class="dropdown-item" href="#"><i class="ri-file-download-fill mr-2"></i>Download</a>
-								</div>
-							</div>
-						</div>
 					</div>
 					<div class="iq-card-body">
 						<ul class="suggested-page-story m-0 p-0 list-inline">
+							@foreach($randomResults as $result)
 							<li class="mb-3">
 								<div class="d-flex align-items-center mb-3">
-									<img src="{{ url('assets/dashboard/images/page-img/42.png') }}" alt="story-img" class="rounded-circle img-fluid avatar-50">
+									@if(isset($result->userImageByPost->profile_image) && file_exists('images/profile' .$result->userImageByPost->profile_image))
+									<a href="{{ route('user-profile',encrypt($result->NewsfeedUser->id)) }}">
+										<img alt="story-img" class="rounded-circle img-fluid avatar-50" src="{{ url('images/profile',$result->userImageByPost->profile_image) }}">
+									</a>
+									@else
+									<a href="{{ route('user-profile',encrypt($result->NewsfeedUser->id)) }}">
+										<img alt="story-img" class="rounded-circle img-fluid avatar-50" src="{{url('assets/dashboard/img/default-avatar.png')}}">
+									</a>
+									@endif
 									<div class="stories-data ml-3">
-										<h5>Iqonic Studio</h5>
-										<p class="mb-0">Lorem Ipsum</p>
+										<h5><a href="{{ route('user-profile',encrypt($result->NewsfeedUser->id)) }}">{{ ucwords($result->NewsfeedUser->name) }}</a></h5>
+										@php
+										$truncated = (strlen($result->text) > 15) ? substr($result->text, 0, 15) . '...' : $result->text;
+										@endphp
+										<p class="mb-0">{{ $truncated }}</p>
 									</div>
 								</div>
-								<img src="{{ url('assets/dashboard/images/small/img-1.jpg') }}" class="img-fluid rounded" alt="Responsive image">
-								<div class="mt-3"><a href="{{ route('liked-page' )}}" class="btn d-block"><i class="ri-thumb-up-line mr-2"></i> Like Page</a></div>
-							</li>
-							<li class="">
-								<div class="d-flex align-items-center mb-3">
-									<img src="{{ url('assets/dashboard/images/page-img/42.png') }}" alt="story-img" class="rounded-circle img-fluid avatar-50">
-									<div class="stories-data ml-3">
-										<h5>Cakes & Bakes </h5>
-										<p class="mb-0">Lorem Ipsum</p>
-									</div>
+								@if($result->NewsfeedGallaries->count() == 1)
+								@foreach($result->NewsfeedGallaries as $imageValue)
+								@if(isset($imageValue->image) && file_exists('images/newsfeed/'.$imageValue->image))
+								<a href="{{ route('newsfeed-show', $result->id) }}"><img src="{{ url('images/newsfeed/'.$imageValue->image) }}" class="img-fluid rounded w-100 suggested-page_img" alt="Responsive image"></a>
+								@endif
+								@endforeach
+								@else
+								@foreach($result->NewsfeedGallaries as $imageValue)
+								@if(isset($imageValue->image) && file_exists('images/newsfeed/'.$imageValue->image))
+								<a href="{{ route('newsfeed-show', $result->id) }}"><img src="{{ url('images/newsfeed/'.$imageValue->image) }}" class="img-fluid rounded w-100 suggested-page_img" alt="Responsive image"></a>
+								@endif
+								@endforeach
+								@endif
+								<div class="mt-3">
+									@php
+									$like = null;
+									foreach($result->NewsfeedLike as $newLike) {
+									if($newLike->NewsfeedUser->id == Auth::user()->id) {
+									$like = true;
+									break;
+									}
+									}
+									@endphp
+									<a href="javascript:void(0)" class="btn d-block likePost like1Color_{{ $result->id }}" newsfeed_id="{{ $result->id }}" route="{{ route('newsfeed-like')}}" user_id="{{ $result->user_id }}" likes_id="{{ Auth::user()->id }}">
+										@if($like)
+										<span style="color: #ff5e3a;"><i class="ri-thumb-down-line mr-2"></i> Unlike Page</span>
+										@else
+										<i class="ri-thumb-up-line mr-2"></i> Like Page
+										@endif
+									</a>
 								</div>
-								<img src="{{ url('assets/dashboard/images/small/img-2.jpg') }}" class="img-fluid rounded" alt="Responsive image">
-								<div class="mt-3"><a href="{{ route('liked-page' )}}" class="btn d-block"><i class="ri-thumb-up-line mr-2"></i> Like Page</a></div>
 							</li>
+							@endforeach
 						</ul>
 					</div>
 				</div>
@@ -582,6 +652,7 @@
 			user_id = $(this).attr('user_id');
 			likes_id = $(this).attr('likes_id');
 			route = $(this).attr('route');
+			face_icon = $(this).find('input').val();
 
 			$.ajax({
 				url: route,
@@ -591,15 +662,22 @@
 					"newsfeed_id": newsfeed_id,
 					"user_id": user_id,
 					"likes_id": likes_id,
+					"face_icon": face_icon,
 				},
 				beforeSend: function() {},
 				success: function(data) {
+					console.log('data', data);
+					$('.likePost').find('input').val(data['newsfeedLike']);
 					if (data['is_like'] === true) {
-						$('.like1Color_' + newsfeed_id).css("background-color", "#ff5e3a");
-						$('.like2Color_' + newsfeed_id).css("background-color", "#ff5e3a");
+						html = `<i class="ri-thumb-down-line mr-2"></i>Unlike Page`;
+						$('.like1Color_' + newsfeed_id).html(html);
+						$('.like1Color_' + newsfeed_id).css("color", "#ff5e3a");
+						//$('.like2Color_' + newsfeed_id).css("background-color", "#ff5e3a");
 					} else {
-						$('.like1Color_' + newsfeed_id).css("background-color", "#fafbfd");
-						$('.like2Color_' + newsfeed_id).css("background-color", "#9a9fbf");
+						html = `<i class="ri-thumb-up-line mr-2"></i>Like Page`;
+						$('.like1Color_' + newsfeed_id).html(html);
+						$('.like1Color_' + newsfeed_id).css("color", "#212529");
+						//$('.like2Color_' + newsfeed_id).css("background-color", "#9a9fbf");
 					}
 					$('.total_count_' + newsfeed_id).html(data['count']);
 				}
@@ -639,7 +717,7 @@
 				}
 			})
 		});
-		
+
 		$(document).on('click', '.likeCommentPost', function() {
 			newsfeed_id = $(this).attr('newsfeed_id');
 			users_id = $(this).attr('users_id');
@@ -883,7 +961,7 @@
 									_html = response.data;
 									$('.comment_add_' + newsfeed_id).hide();
 									$(".comments_list_" + newsfeed_id).hide();
-									$(".hide-newsfeed_" + newsfeed_id).append(_html);
+									$(".hide-newsfeed_" + newsfeed_id).html(_html);
 									$('.comment-reply-form').hide();
 									$('.comment-text-' + newsfeed_id).val('');
 									$(".comment_reply_btn").click(function() {
@@ -1004,13 +1082,22 @@
 	// });
 
 	// Post Comment
-	$(document).ready(function() {
+	function doComment(event, newsfeed_id) {
+		if (event.keyCode == 13) {
+			let comment = $('.comment-text-' + newsfeed_id).text();
+			if (!event.shiftKey && comment) {
+				$('.comment_add_' + newsfeed_id).submit();
+				event.stopPropagation();
+			}
+		}
 
+	}
+	$(document).ready(function() {
 		$('.comment-form').on('submit', function(e) {
 			e.preventDefault();
 			let user_id = $(this).attr('user_id')
 			let newsfeed_id = $(this).attr('newsfeed_id')
-			let comment = $(".comment-text-" + newsfeed_id).val();
+			let comment = $(".comment-text-" + newsfeed_id).text();
 			route = $(this).attr('route');
 			$.ajax({
 				url: route,
@@ -1022,17 +1109,7 @@
 					newsfeed_id: newsfeed_id,
 				},
 				success: function(response) {
-					_html = response.data;
-					$('.comment_add_' + newsfeed_id).hide();
-					$(".comments_list_" + newsfeed_id).hide();
-					$(".view-more-comment-btn-" + newsfeed_id).hide();
-					$(".hide-newsfeed_" + newsfeed_id).append(_html);
-					$('.comment-reply-form').hide();
-					$('.comment-text-' + newsfeed_id).val('');
-					$(".comment_reply_btn").click(function() {
-						var id = $(this).attr('id');
-						$(".cr_" + response.insertData.id).toggle();
-					});
+					location.reload();
 				},
 				error: function(response) {
 					$('.comment-error-' + newsfeed_id).text(response.responseJSON.errors.comment);
@@ -1050,17 +1127,19 @@
 		};
 
 		route = $(this).attr('route');
+		user_id = $(this).attr('user_id');
 		$.ajax({
 			url: route,
 			method: "GET",
 			data: {
 				"_token": "{{ csrf_token() }}",
+				"user_id": user_id,
 			},
 			beforeSend: function() {},
 			success: function(data) {
-				toastr.success(data.text);
+				toastr.success(data.text.message);
 				if (data.status) {
-					location.reload();
+					$('.add-friend-' + user_id).remove();
 				}
 			}
 		})
@@ -1107,6 +1186,7 @@
 					toastr.success(data.text);
 					if (data.status) {
 						$('#comment-el-' + comment_id).remove();
+						$('.reply_comment_add_' + comment_id).remove();
 					}
 				}
 			})
@@ -1139,7 +1219,7 @@
 				success: function(response) {
 					console.log(response.data);
 					$('.comment_reply_add_' + comment_id).hide();
-					$(".reply_comment_add_" + comment_id).append(response.data);
+					$(".reply_comment_add_" + comment_id).html(response.data);
 					$('.comment-reply-child-form').hide();
 					$('.comment-reply-text-' + comment_id).val('');
 					$(".comment_reply_child_btn").click(function() {
@@ -1179,7 +1259,7 @@
 				success: function(response) {
 					// location.reload();
 					$('.comment_reply_child_add_' + reply_comment_id).hide();
-					$(".reply_comment_add_" + comment_id).append(response.data);
+					$(".reply_comment_add_" + comment_id).html(response.data);
 					$('.comment-reply-child-form').hide();
 					$('.comment-reply-child-text-' + reply_comment_id).val('');
 					$(".comment_reply_child_btn").click(function() {
@@ -1267,7 +1347,7 @@
 					_html = data;
 					$('.view-more-comment-btn-' + newsfeed_id).hide();
 					$(".comments_list_" + newsfeed_id).hide();
-					$(".hide-newsfeed_" + newsfeed_id).append(data);
+					$(".hide-newsfeed_" + newsfeed_id).html(data);
 					// $('.comment-form').hide();
 					// $('.comment-reply-form').hide();
 					// $('.comment-reply-child-form').hide();
@@ -1336,7 +1416,7 @@
 								},
 								success: function(response) {
 									$('.comment_reply_add_' + comment_id).hide();
-									$(".reply_comment_add_" + comment_id).append(response.data);
+									$(".reply_comment_add_" + comment_id).html(response.data);
 									$('.comment-reply-child-form').hide();
 									$('.comment-reply-text-' + comment_id).val('');
 									$(".comment_reply_child_btn").click(function() {
@@ -1373,7 +1453,7 @@
 								},
 								success: function(response) {
 									$('.comment_reply_child_add_' + reply_comment_id).hide();
-									$(".reply_comment_add_" + comment_id).append(response.data);
+									$(".reply_comment_add_" + comment_id).html(response.data);
 									$('.comment-reply-child-form').hide();
 									$('.comment-reply-child-text-' + reply_comment_id).val('');
 									$(".comment_reply_child_btn").click(function() {
@@ -1534,6 +1614,44 @@
 				console.log(data);
 			}
 		});
+	});
+	$('#my_file1').change(function() {
+		filePreview(this);
+	});
+
+	function filePreview(input) {
+		if (input.files && input.files[0]) {
+			var reader = new FileReader();
+			reader.onload = function(e) {
+				$('#post_upload_Form + embed').remove();
+				$('#post_upload_Form #preview_embed').html('<embed src="' + e.target.result + '" width="80" height="50">');
+			};
+			reader.readAsDataURL(input.files[0]);
+		}
+	}
+
+	$('.facemocion').faceMocion({
+		emociones: [{
+				"emocion": "amo",
+				"TextoEmocion": "I love"
+			},
+			{
+				"emocion": "divierte",
+				"TextoEmocion": "I enjoy"
+			},
+			{
+				"emocion": "gusta",
+				"TextoEmocion": "I like"
+			},
+			{
+				"emocion": "asombro",
+				"TextoEmocion": "It amazes me"
+			},
+			{
+				"emocion": "alegre",
+				"TextoEmocion": "I am glad"
+			}
+		]
 	});
 </script>
 

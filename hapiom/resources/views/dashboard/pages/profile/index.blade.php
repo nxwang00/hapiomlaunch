@@ -92,11 +92,12 @@
                             </div>
                             <div class="user-detail text-center mb-3">
                                 <div class="profile-img">
-                                    @if(isset($user->userInfo->profile_image))
+                                    @if(isset($user->userInfo->profile_image) && file_exists('images/profile/'. $user->userInfo->profile_image))
                                     <img src="{{ url('images/profile/',$user->userInfo->profile_image) }}" alt="profile-img" class="avatar-130 img-fluid" />
                                     @else
                                     <img src="{{url('assets/dashboard/img/default-avatar.png')}}" alt="profile-img" class="avatar-130 img-fluid" />
                                     @endif
+                                    <input type="file" class="profile-picture" id="file-upload" name="profile_image" accept="image/*">
                                 </div>
                                 <div class="profile-detail">
                                     <h3 class="">{{ ucwords($user->name) }}</h3>
@@ -258,7 +259,7 @@
                                                 @foreach($friends as $friend)
                                                 <li class="d-flex align-items-center">
                                                     <div class="user-img img-fluid">
-                                                        @if(isset($friend->userInfo->profile_image))
+                                                        @if(isset($friend->userInfo->profile_image) && file_exists('images/profile/'. $friend->userInfo->profile_image))
                                                         <img src="{{ url('images/profile/',$friend->userInfo->profile_image) }}" alt="story-img" class="rounded-circle avatar-40">
                                                         @else
                                                         <img src="{{ url('assets/dashboard/img/default-avatar.png') }}" alt="profile-img" class="rounded-circle avatar-40" />
@@ -283,14 +284,14 @@
                                         <div class="iq-card-body" data-toggle="modal" data-target="#post-modal">
                                             <div class="d-flex align-items-center">
                                                 <div class="user-img">
-                                                    @if(isset(Auth::user()->userInfo->profile_image))
+                                                    @if(isset(Auth::user()->userInfo->profile_image) && file_exists('images/profile/'. $friend->userInfo->profile_image))
                                                     <img src="{{ url('images/profile/',$friend->userInfo->profile_image) }}" alt="userimg" class="avatar-60 rounded-circle img-fluid">
                                                     @else
                                                     <img src="{{ url('assets/dashboard/img/default-avatar.png') }}" alt="profile-img" class="avatar-60 rounded-circle img-fluid" />
                                                     @endif
                                                 </div>
                                                 <form class="post-text ml-3 w-100" action="javascript:void();">
-                                                    <input type="text" class="form-control rounded" placeholder="Write something here..." style="border:none;">
+                                                    <input type="text" class="form-control" placeholder="What's on your mind?" style="border: none;">
                                                 </form>
                                             </div>
                                             <hr>
@@ -326,16 +327,20 @@
                                                     <div class="modal-body">
                                                         <div class="d-flex align-items-center">
                                                             <div class="user-img">
-                                                                @if(isset(Auth::user()->userInfo->profile_image))
+                                                                @if(isset(Auth::user()->userInfo->profile_image) && file_exists('images/profile/'. $friend->userInfo->profile_image))
                                                                 <img src="{{ url('images/profile/',$friend->userInfo->profile_image) }}" alt="userimg" class="avatar-60 rounded-circle img-fluid">
                                                                 @else
                                                                 <img src="{{ url('assets/dashboard/img/default-avatar.png') }}" alt="profile-img" class="avatar-60 rounded-circle img-fluid" />
                                                                 @endif
                                                             </div>
-                                                            <form class="post-text ml-3 w-100" action="javascript:void();">
-                                                                <input type="text" class="form-control rounded" placeholder="Write something here..." style="border:none;">
-                                                            </form>
+                                                            <div class="caption ml-2">
+                                                                <h5 class="mb-0 line-height">{{ ucwords(Auth::user()->name) }}</h5>
+                                                            </div>
+
                                                         </div>
+                                                        <form class="post-text w-100 mt-3" action="javascript:void();">
+                                                            <input type="text" class="form-control" placeholder="What's on your mind?" style="border-radius:20px;">
+                                                        </form>
                                                         <hr>
                                                         <ul class="d-flex flex-wrap align-items-center list-inline m-0 p-0">
                                                             <li class="col-md-6 mb-3">
@@ -368,7 +373,7 @@
                                                             <div class="d-flex align-items-center justify-content-between">
                                                                 <div class="d-flex align-items-center">
                                                                     <div class="user-img mr-3">
-                                                                        @if(isset(Auth::user()->userInfo->profile_image))
+                                                                        @if(isset(Auth::user()->userInfo->profile_image) && file_exists('images/profile/'. $friend->userInfo->profile_image))
                                                                         <img src="{{ url('images/profile/',$friend->userInfo->profile_image) }}" alt="userimg" class="avatar-60 rounded-circle img-fluid">
                                                                         @else
                                                                         <img src="{{ url('assets/dashboard/img/default-avatar.png') }}" alt="profile-img" class="avatar-60 rounded-circle img-fluid" />
@@ -392,7 +397,11 @@
                                                 <div class="user-post-data p-3">
                                                     <div class="d-flex flex-wrap">
                                                         <div class="media-support-user-img mr-3">
-                                                            <img class="rounded-circle img-fluid" src="{{ url('assets/dashboard/images/user/1.jpg') }}" alt="">
+                                                            @if(isset($user->userInfo->profile_image) && file_exists('images/profile/' . $user->userInfo->profile_image))
+                                                            <img class="rounded-circle img-fluid" src="{{ url('images/profile/' . $user->userInfo->profile_image) }}" alt="profile-img">
+                                                            @else
+                                                            <img class="rounded-circle img-fluid" src="{{ url('assets/dashboard/img/default-avatar.png') }}" alt="profile-img">
+                                                            @endif
                                                         </div>
                                                         <div class="media-support-info mt-2">
                                                             <h5 class="mb-0 d-inline-block"><a href="#" class="">{{ ucwords($user->name) }}</a></h5>
@@ -463,7 +472,7 @@
                                                 @if(isset($profilePost->NewsfeedGallaries))
                                                 <div class="user-post">
                                                     @foreach($profilePost->NewsfeedGallaries as $imageValue)
-                                                    <a href="javascript:void();"><img src="{{ url('images/newsfeed/'.$imageValue->image) }}" alt="post-image" class="img-fluid w-100" /></a>
+                                                    <a href="javascript:void();"><img src="{{ url('images/newsfeed/'.$imageValue->image) }}" alt="post-image" class="img-fluid w-100" style="height: 360px;" /></a>
                                                     @endforeach
                                                 </div>
                                                 @endif
@@ -709,7 +718,7 @@
                                                             <div class="d-flex align-items-center justify-content-between">
                                                                 <div class="d-flex align-items-center">
                                                                     <a href="#">
-                                                                        @if(isset($friend->friendUser->userInfo->profile_image))
+                                                                        @if(isset($friend->friendUser->userInfo->profile_image) && file_exists('images/profile/'. $friend->friendUser->userInfo->profile_image))
                                                                         <img src="{{ url('images/profile/',$friend->friendUser->userInfo->profile_image) }}" alt="profile-img" class="img-fluid" />
                                                                         @else
                                                                         <img src="{{ url('assets/dashboard/images/user/04.jpg') }}" alt="profile-img" class="img-fluid" />
@@ -836,7 +845,7 @@
                         <div class="col-sm-12 col-md-6">
                             <div class="form-group">
                                 <label for="event_name">Image:</label>
-                                <div class="custom-file">
+                                <div class="custom-file" style="z-index: 0;">
                                     <input type="file" class="custom-file-input" id="event_image" name="event_image" required>
                                     <label class="group-image-label custom-file-label form-control" for="event_image" style="line-height: 30px !important;"></label>
                                 </div>
@@ -897,7 +906,7 @@
                     </div>
                     <div class="form-group">
                         <label for="photo_image">Image:</label>
-                        <div class="custom-file">
+                        <div class="custom-file" style="z-index: 0;">
                             <input type="file" class="custom-file-input" id="photo_image" name="photo_image" required>
                             <label class="photo-image-label custom-file-label form-control" for="photo_image" style="line-height: 30px !important;"></label>
                         </div>
@@ -966,7 +975,7 @@
                     </div>
                     <div class="form-group">
                         <label for="store_image">Image:</label>
-                        <div class="custom-file">
+                        <div class="custom-file" style="z-index: 0;">
                             <input type="file" class="custom-file-input" id="store_image" name="store_image" @if(!isset($user->store)) required @endif>
                             <label class="store-image-label custom-file-label form-control" for="store_image" style="line-height: 30px !important;">@if (isset($user->store)) {{$user->store->image}} @endif</label>
                         </div>
@@ -1012,12 +1021,138 @@
         </div>
     </div>
 </div>
+
+<div class="modal" id="cropImageModal">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h4 class="modal-title">Update profile picture</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <!-- Modal body -->
+            <div class="modal-body">
+                <div id="resizer"></div>
+                <button class="btn rotate float-lef" data-deg="90" > 
+                <i class="fas fa-undo"></i></button>
+                <button class="btn rotate float-right" data-deg="-90" > 
+                <i class="fas fa-redo"></i></button>
+                <hr>
+                <button class="btn btn-block btn-dark" id="upload" route="{{ route('profile-image-upload-save')}}">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 @section('page-js-link')
 @endsection
 
 @section('page-js')
 <script type="text/javascript">
+    $(document).ready(function() {
+        var croppie = null;
+        var el = document.getElementById('resizer');
+
+        $.base64ImageToBlob = function(str) {
+            // extract content type and base64 payload from original string
+            var pos = str.indexOf(';base64,');
+            var type = str.substring(5, pos);
+            var b64 = str.substr(pos + 8);
+        
+            // decode base64
+            var imageContent = atob(b64);
+        
+            // create an ArrayBuffer and a view (as unsigned 8-bit)
+            var buffer = new ArrayBuffer(imageContent.length);
+            var view = new Uint8Array(buffer);
+        
+            // fill the view, using the decoded base64
+            for (var n = 0; n < imageContent.length; n++) {
+                view[n] = imageContent.charCodeAt(n);
+            }
+        
+            // convert ArrayBuffer to Blob
+            var blob = new Blob([buffer], { type: type });
+        
+            return blob;
+        }
+
+        $.getImage = function(input, croppie) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {  
+                    croppie.bind({
+                        url: e.target.result,
+                    });
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        $("#file-upload").on("change", function(event) {
+            $("#cropImageModal").modal();
+            // Initailize croppie instance and assign it to global variable
+            croppie = new Croppie(el, {
+                    viewport: {
+                        width: 200,
+                        height: 200,
+                        type: 'circle'
+                    },
+                    boundary: {
+                        width: 250,
+                        height: 250
+                    },
+                    enableOrientation: true
+                });
+            $.getImage(event.target, croppie); 
+        });
+
+        $("#upload").on("click", function() {
+            croppie.result('base64').then(function(base64) {
+                $("#cropImageModal").modal("hide"); 
+                $(".profile-img img").attr("src","assets/dashboard/images/page-img/page-load-loader.gif");
+
+                var route = $("#upload").attr('route');
+                var formData = new FormData();
+                formData.append("profile_image", $.base64ImageToBlob(base64));
+                let _token = $('meta[name="csrf-token"]').attr('content');
+                _token = document.getElementsByName("_token")[0].value
+                formData.append('_token', _token);
+                $.ajax({
+                    type: 'POST',
+                    url: route,
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function() {},
+                    success: function(data) {
+                        if (data == "uploaded") {
+                            $(".profile-img img").attr("src", base64); 
+                        } else {
+                            $(".profile-img img").attr("src","assets/dashboard/img/default-avatar.png"); 
+                            console.log(data['profile_image']);
+                        }
+                    },
+                    error: function(error) {
+                        console.log(error);
+                        $(".profile-img img").attr("src","assets/dashboard/img/default-avatar.png"); 
+                    }
+                });
+            });
+        });
+
+        // To Rotate Image Left or Right
+        $(".rotate").on("click", function() {
+            croppie.rotate(parseInt($(this).data('deg'))); 
+        });
+
+        $('#cropImageModal').on('hidden.bs.modal', function (e) {
+            // This function will call immediately after model close
+            // To ensure that old croppie instance is destroyed on every model close
+            setTimeout(function() { croppie.destroy(); }, 100);
+        })
+
+    });
+
     $(document).on('click', '.block-friend', function() {
         toastr.options = {
             "closeButton": true,

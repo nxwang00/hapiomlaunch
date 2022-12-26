@@ -39,11 +39,12 @@ class NewsfeedController extends Controller
         $sendRequset = Friendrequest::where('request_to', Auth::user()->id)->pluck('request_from');
         $requestedAndFrinedsId = array_merge($friends_id->toArray(), $requsetFriend->toArray(), $sendRequset->toArray());
         $allData = User::where('id', '!=', Auth::user()->id)->whereNotIn('id', $requestedAndFrinedsId)->where('role_id', Auth::user()->role_id)->limit(10)->get();
-
-
+        $accepted_friend_ids = Friendlist::select('friend_id')->where('user_id', Auth::id())->where('friendstatus', 1)->pluck('friend_id');
+        $acceptedFriends = User::whereIn('id', $accepted_friend_ids->toArray())->limit(10)->get();
         $data = [
             'userinfo'  => $userinfo,
             'friends'   => $allData,
+            'acceptedFriends' => $acceptedFriends
         ];
         return view('dashboard.pages.newsfeed.index', $provider->meta())->with($data);
     }
@@ -68,7 +69,7 @@ class NewsfeedController extends Controller
     public function store(StoreRequest $request)
     {
         if ($level = $request->persist()->getPost()) {
-            flashWebResponse('created', 'Post');
+            //flashWebResponse('created', 'Post');
             return redirect()->back();
 
             return redirect()->route('newsfeed');
@@ -122,22 +123,26 @@ class NewsfeedController extends Controller
         $newsfeed_id = $request->newsfeed_id;
         $user_id   = $request->user_id;
         $likes_id = $request->likes_id;
+        $face_icon = $request->face_icon;
 
         $data = array('newsfeed_id' => $newsfeed_id, 'user_id' => $user_id, 'likes_id' => $likes_id);
+        $dataWithLikeIcon = array('newsfeed_id' => $newsfeed_id, 'user_id' => $user_id, 'likes_id' => $likes_id, 'face_icon' => $face_icon);
         $get_data = Newsfeedlike::where($data)->get();
 
         if ($get_data->count() >= 1) {
             $like = Newsfeedlike::where($data)->delete();
             $is_like = false;
         } else {
-            $like = Newsfeedlike::create($data);
+            $like = Newsfeedlike::create($dataWithLikeIcon);
             $is_like = true;
         }
 
         $userCount = Newsfeedlike::where('newsfeed_id', $newsfeed_id)->get()->count();
+        $newsfeedLike = Newsfeedlike::where($data)->first();
         $response = [
             'count' => $userCount,
             'is_like' => $is_like,
+            'newsfeedLike' => $newsfeedLike,
         ];
         return $response;
     }

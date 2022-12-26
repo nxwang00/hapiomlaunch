@@ -134,7 +134,7 @@
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="photo_image">Image:</label>
-                                                        <div class="custom-file">
+                                                        <div class="custom-file" style="z-index: 0;">
                                                             <input type="file" class="custom-file-input" id="photo_image_{{ $photo->id }}" name="photo_image" img_url="{{ $photo->image }}">
                                                             <label class="photo-image-label custom-file-label form-control" for="photo_image_{{ $photo->id }}" style="line-height: 30px !important;"></label>
                                                             <input type="hidden" class="form-control" name="photo_id" value="{{ $photo->id }}">
@@ -199,7 +199,7 @@
                     </div>
                     <div class="form-group">
                         <label for="photo_image">Image:</label>
-                        <div class="custom-file">
+                        <div class="custom-file" style="z-index: 0;">
                             <input type="file" class="custom-file-input" id="photo_image" name="photo_image" required>
                             <label class="photo-image-label custom-file-label form-control" for="photo_image" style="line-height: 30px !important;"></label>
                         </div>

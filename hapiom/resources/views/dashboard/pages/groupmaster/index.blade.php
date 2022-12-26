@@ -14,7 +14,7 @@
                     <div class="iq-card">
                         <div class="iq-card-header d-flex justify-content-between">
                             <div class="iq-header-title">
-                                <h4 class="card-title">Group</h4>
+                                <h4 class="card-title">Groups</h4>
                             </div>
                             <a href="{{ route('group-create') }}" class="btn-sm btn-primary btn-md-2 float-right">Add New Group<div class="ripple-container"></div></a>
                         </div>
@@ -39,7 +39,7 @@
                                         @foreach ($results as $index => $result)
                                         <tr>
                                             <th scope="row">#{{$index + $results->firstItem()}}</th>
-                                            <td><a href="{{  route('newsfeed',encrypt($result->id)) }}" class="h6 count">{{ $result->name }}</a></td>
+                                            <td><a href="{{  route('group-users.show', $result->id) }}" class="h6 count">{{ $result->name }}</a></td>
                                             <td>
                                                 @if($result->group_type == 1)
                                                 <span>Paid / {{ $result->amount }}</span>
@@ -66,7 +66,7 @@
                                             </td>
                                             <td>
                                                 @if ((Auth::user()->role_id == 1 || in_array(Auth::user()->meberships_id, [1,2,3])) && $result->group_type == 1)
-                                                <a href="{{ route('group-users.show',$result->id) }}" class="btn btn-sm bg-info"> <span class="badge badge-info">Show Group Member </span></a>
+                                                <a href="{{ route('group-users.show',$result->id) }}" class="btn btn-sm bg-pink"> <span class="badge badge-info">Show Group Member</span></a>
                                                 @endif
                                                 <a href="{{ route('group-edit',$result->id) }}" class="btn btn-sm bg-blue"> <span class="badge badge-primary">Edit </span></a>
                                                 <a href="javascript:void(0)" route="{{ route('group-delete',$result->id) }}" id="{{$result->id}}" text="remove level" class="btn btn-sm btn-border-think btn-transparent c-grey delete"><span class="badge badge-danger">Delete</span></a>
@@ -87,34 +87,36 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
 
+@endsection
+@section('page-js-link') @endsection
+@section('page-js')
+<script type="text/javascript">
+    $(document).on('click', '.delete', function() {
+        user_id = $(this).attr('id');
+        route = $(this).attr('route');
+        text = $(this).attr('text');
+        text = text.replace("_", " ");
 
-            @endsection
-            @section('page-js-link') @endsection
-            @section('page-js')
-            <script type="text/javascript">
-                $(document).on('click', '.delete', function() {
-                    user_id = $(this).attr('id');
-                    route = $(this).attr('route');
-                    text = $(this).attr('text');
-                    text = text.replace("_", " ");
-
-                    if (!confirm("Are you sure? Do yo want to delete group.")) {
-                        return false;
-                    }
-                    $.ajax({
-                        url: route,
-                        method: "GET",
-                        data: {
-                            "_token": "{{ csrf_token() }}",
-                        },
-                        beforeSend: function() {},
-                        success: function(data) {
-                            if (data.status) {
-                                location.reload();
-                            }
-                        }
-                    })
-                });
-            </script>
-            @endsection
+        if (!confirm("Are you sure? Do yo want to delete group.")) {
+            return false;
+        }
+        $.ajax({
+            url: route,
+            method: "GET",
+            data: {
+                "_token": "{{ csrf_token() }}",
+            },
+            beforeSend: function() {},
+            success: function(data) {
+                if (data.status) {
+                    location.reload();
+                }
+            }
+        })
+    });
+</script>
+@endsection

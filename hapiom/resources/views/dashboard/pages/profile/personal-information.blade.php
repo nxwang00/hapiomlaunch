@@ -126,7 +126,7 @@
 										<div class="form-group row">
 											<div class="col-md-9">
 												<div class="profile-img-edit">
-													@if(isset(Auth::user()->userInfo->profile_image))
+													@if(isset(Auth::user()->userInfo->profile_image) && file_exists('images/profile/'. Auth::user()->userInfo->profile_image))
 													<img class="profile-pic" src="{{ url('images/profile/',Auth::user()->userInfo->profile_image) }}" alt="profile-pic">
 													@else
 													<img class="profile-pic" src="{{url('assets/dashboard/img/default-avatar.png')}}" alt="profile-pic">
@@ -176,9 +176,15 @@
 													<label class="custom-control-label" for="customRadio7"> Female </label>
 												</div>
 											</div>
-											<div class="form-group col-sm-6">
+											<!-- <div class="form-group col-sm-6">
 												<label for="dob">Date Of Birth:</label>
 												<input class="form-control" type="text" name="dob" id="dob" value="{{ @$user_info->dob }}" required>
+											</div> -->
+											<div class="form-group col-sm-6">
+												<label for="birthday">Date Of Birth:</label>
+												<div class="d-flex justify-content-between">
+													<input type="datetime-local" class="form-control" id="birthday" name="dob" value="{{ @$user_info->dob }}" required>
+												</div>
 											</div>
 											<div class="form-group col-sm-6">
 												<label>Marital Status:</label>

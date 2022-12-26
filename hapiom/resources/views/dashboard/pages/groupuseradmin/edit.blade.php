@@ -30,14 +30,16 @@
                                   </div>
                                   <div class="form-group col-md-4">
                                      <label for="pwd">Image:</label>
-                                     <div class="custom-file">
+                                     <div class="custom-file" style="z-index: 0;">
                                        <input type="file" class="custom-file-input" id="customFile" name="image">
                                        <label class="custom-file-label" for="customFile">Choose file</label>
                                     </div>
                                   </div>
+                                  @if(isset($groupmaster->image) && file_exists('images/group/'.$groupmaster->image))
                                   <div class="form-group col-md-2">
                                      <img src="{{ url('images/group/'.$groupmaster->image) }}" style="max-width: 65px;">
                                   </div>
+                                  @endif
                               </div>
                               <div class="row">
                                   <div class="form-group col-md-6">

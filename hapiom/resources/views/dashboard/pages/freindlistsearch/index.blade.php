@@ -53,8 +53,8 @@
 													<div class="user-detail">
 														<div class="profile-detail">
 															<div class="friend-item-img pr-4">
-																@if(isset($result->friendUser->userInfo->profile_image))
-																<img src="{{ url('images/profile/',$result->friendUser->userInfo->profile_image) }}" alt="profile-img" class="avatar-60 img-fluid rounded-circle" />
+																@if(isset($result->friendUser->userInfo->profile_image) && file_exists('images/profile/' . $result->friendUser->userInfo->profile_image))
+																<img src="{{ url('images/profile/' ,$result->friendUser->userInfo->profile_image) }}" alt="profile-img" class="avatar-60 img-fluid rounded-circle" />
 																@else
 																<img src="{{ url('assets/dashboard/img/default-avatar.png') }}" alt="profile-img" class="avatar-60 img-fluid rounded-circle" />
 																@endif
@@ -90,14 +90,14 @@
 							<div class="row">
 								@foreach(Auth::user()->friendSuggestion() as $result)
 								<div class="col-md-4 mt-4">
-									<div class="iq-card">
+									<div class="iq-card friend-card-{{ $result->id }}">
 										<div class="iq-card-body profile-page p-0">
 											<div class="profile-header-image">
 												<div class="profile-info p-4">
 													<div class="user-detail">
 														<div class="profile-detail">
 															<div class="friend-item-img pr-4">
-																@if(isset($result->userInfo->profile_image))
+																@if(isset($result->userInfo->profile_image) && file_exists('images/profile/'. $result->userInfo->profile_image))
 																<img src="{{ url('images/profile/',$result->userInfo->profile_image) }}" alt="profile-img" class="avatar-60 img-fluid rounded-circle" />
 																@else
 																<img src="{{ url('assets/dashboard/img/default-avatar.png') }}" alt="profile-img" class="avatar-60 img-fluid rounded-circle" />
@@ -110,7 +110,7 @@
 															</div>
 														</div>
 														<div class="text-center">
-															<button class="btn btn-primary" onclick='addFriend("{{ $result->id }}")'>Send request</a>
+															<button class="btn btn-primary add_friend" route="{{ route('add-friend',$result->id)}}" user_id="{{$result->id}}">Send request</a>
 														</div>
 													</div>
 												</div>
@@ -132,15 +132,64 @@
 @section('page-js-link') @endsection
 @section('page-js')
 <script>
-	function addFriend(userId) {
-		var url = `/add-friend/${userId}`;
-		$.get(url, function(res) {
-			if (res.status === "success") {
-				location.reload();
-			} else {
-				toastr.error("Sending request is failed");
+	// function addFriend(userId) {
+	// 	var url = `/add-friend/${userId}`;
+	// 	$.get(url, function(res) {
+	// 		if (res.status === "success") {
+	// 			location.reload();
+	// 		} else {
+	// 			toastr.error("Sending request is failed");
+	// 		}
+	// 	})
+
+	// 	toastr.options = {
+	// 		"closeButton": true,
+	// 		"newestOnTop": true,
+	// 		"positionClass": "toast-top-right"
+	// 	};
+
+	// 	url = `/add-friend/${userId}`;
+	// 	user_id = userId;
+	// 	$.ajax({
+	// 		url: route,
+	// 		method: "GET",
+	// 		data: {
+	// 			"_token": "{{ csrf_token() }}",
+	// 			"user_id": user_id,
+	// 		},
+	// 		beforeSend: function() {},
+	// 		success: function(data) {
+	// 			toastr.success(data.text);
+	// 			// if (data.status) {
+	// 			// 	location.reload();
+	// 			// }
+	// 		}
+	// 	})
+	// }
+	$('.add_friend').on('click', function() {
+		toastr.options = {
+			"closeButton": true,
+			"newestOnTop": true,
+			"positionClass": "toast-top-right"
+		};
+
+		route = $(this).attr('route');
+		user_id = $(this).attr('user_id');
+		$.ajax({
+			url: route,
+			method: "GET",
+			data: {
+				"_token": "{{ csrf_token() }}",
+				"user_id": user_id,
+			},
+			beforeSend: function() {},
+			success: function(data) {
+				toastr.success(data.text.message);
+				if (data.status) {
+					$('.friend-card-' + user_id).remove();
+				}
 			}
 		})
-	}
+	});
 </script>
 @endsection

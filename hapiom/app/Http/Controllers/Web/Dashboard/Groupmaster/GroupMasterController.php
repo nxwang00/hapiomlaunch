@@ -42,7 +42,6 @@ class GroupMasterController extends Controller
 
     public function showGroupUsers($groupId)
     {
-        //return $groupId;
         $results = GroupUser::where('group_id', $groupId)->get();
         //return $results;
         if (Session::get('groupId')) {

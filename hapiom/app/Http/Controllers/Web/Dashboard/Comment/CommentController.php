@@ -47,92 +47,6 @@ class CommentController extends Controller
                 $comments = Newsfeedcomment::where('id', $store->id)->get();
                 $count = Newsfeedcomment::where('newsfeed_id', $store->newsfeed_id)->get()->count();
                 $response = array();
-                foreach ($comments as $comment) {
-
-                    $output = '<ul id="comment-el-' . $comment->id . '" class="comments-list comments_list_' . $comment->newsfeed_id . '">
-                    <li class="comment-item">
-                        <div class="post__author author vcard inline-items">';
-                    if (isset($comment->profileImage->profile_image)) {
-                        $output .= '<img loading="lazy" src="' . url('images/profile', $comment->profileImage->profile_image) . '" width="40" height="40" alt="author">';
-                    } else {
-                        $output .= '<img loading="lazy" src="' . url('assets/dashboard/img/noimage.jpg') . '" width="36" height="36" alt="author">';
-                    }
-
-                    $output .= '<div class="author-date">
-                                <a class="h6 post__author-name fn" href="#">' . ucwords($comment->NewsfeedUser->name) . '</a>
-                                <div class="post__date">
-                                    <time class="published" datetime="2004-07-24T18:18">';
-                    $created = new Carbon($comment->created_at);
-                    $diffInDays = Carbon::parse($comment->created_at)->diffInDays();
-                    $showDiff = Carbon::parse($comment->created_at)->diffForHumans();
-
-                    if ($diffInDays > 0) {
-                        $showDiff .= ', ' . Carbon::parse($comment->created_at)->addDays($diffInDays)->diffInHours() . ' Hours';
-                    }
-                    $showDiff;
-                    $output .=  '<p>' . ucwords($showDiff) . '</p> </time>
-                                </div>
-                            </div>';
-
-                    if ($comment->user_id === Auth::user()->id) {
-                        $output .= '<div class="more"><svg class="olymp-three-dots-icon"><use xlink:href="#olymp-three-dots-icon"></use></svg></div>';
-                    }
-
-                    $output .= '</div>
-                        <p class="comment-txt-' . $comment->id . '"> ' .  ucwords($comment->comment) . '</p>';
-                    $commentLikeStatus = "";
-                    foreach ($comment->NewsfeedcommentLike as $NewsfeedCommentLike) {
-                        if (isset($NewsfeedCommentLike)) {
-                            if ($NewsfeedCommentLike['user_id'] === Auth::user()->id) {
-                                $commentLikeStatus = "commentLikeColor";
-                            } else {
-                                $commentLikeStatus = "";
-                            }
-                        }
-                    }
-                    $output .=  '<a href="javascript:void(0);" class="post-add-icon inline-items likeCommentPost" comment_id="' . $comment->id . '" newsfeed_id="' . $comment->newsfeed_id . '" route="' . route('newsfeed-comment-like') . '" users_id="' . Auth::user()->id . '">
-                            <svg id="" class="olymp-heart-icon ' . $commentLikeStatus . ' commentlikeColor_' . $comment['id'] . '"><use xlink:href="#olymp-heart-icon"></use></svg>
-                            <span class="total_comment_like_count_' . $comment->id . '">' . $comment->NewsfeedcommentLike->count() . '</span>
-                        </a>';
-                    $output .=  '<a href="javascript:void(0)" class="reply comment_reply_btn" id="' . $comment->id . '">Reply</a>
-                        <div>
-
-                        <!-- Reply Comment Form  -->
-
-                            <form class="inline-items comment-reply-form comment_reply_add_' . $comment->id . ' cr_' . $comment->id . '" route="' . route('comment_reply_add') . '" user_id="' . Auth::user()->id . '" newsfeed_id="' . $comment->newsfeed_id . '" comment_id="' . $comment->id . '" id="">
-                                <div class="post__author author vcard inline-items">';
-                    if (isset($userinfo->profile_image)) {
-                        $output .= '<img loading="lazy" src="' . url('images/profile', $userinfo->profile_image) . '" width="36" height="36" alt="author" class="rounded-circle">';
-                    }
-
-                    $output .= '<div class="form-group with-icon-right ">
-                                        <textarea class="form-control comment-reply-text-' . $comment->id . '" id="comment-reply-text-' . $comment->id . '" name="comment" placeholder=""></textarea>
-                                        <span class="text-danger comment-reply-error-' . $comment->id . '" id=""></span>
-                                        <div class="add-options-message">
-                                            <a href="#" class="options-message" data-bs-toggle="modal" data-bs-target="#update-header-photo">
-                                                <svg class="olymp-camera-icon">
-                                                    <use xlink:href="#olymp-camera-icon"></use>
-                                                </svg>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <button class="btn btn-md-2 btn-primary" id="submit" type="submit">Post Comment</button>
-
-                                <button class="btn btn-md-2 btn-border-think c-grey btn-transparent custom-color comment_reply_btn" id="' . $comment->id . '">Cancel</button>
-
-                            </form>
-                        <!-- ... end Reply Comment Form  -->
-                        </div>';
-
-                    $output .= '</li>
-                    </ul>
-                    <a href="javascript:void(0)" newsfeed_id = "' . $comment->newsfeed_id . '" route="' . route('view-more-comments') . '" class="more-comments view-more-comment-btn-' . $comment->newsfeed_id . '">View ' . ($count - 1) . ' more comments +</a>';
-
-                    $output .= '<!-- ... end Comments -->';
-                    $response[] = $output;
-                }
 
                 return response()->json(['status' => 'success', 'title' => 'Updated!', 'text' => 'Comment updated Successfully', 'data' => $response, "insertData" => $store]);
             }
@@ -372,7 +286,7 @@ class CommentController extends Controller
                 if (isset($comment->profileImage->profile_image)) {
                     $output .= '<img loading="lazy" src="' . url('images/profile', $comment->profileImage->profile_image) . '" width="40" height="40" alt="author">';
                 } else {
-                    $output .= '<img loading="lazy" src="' . url('assets/dashboard/images/user/01.jpg') . '" width="36" height="36" alt="author">';
+                    $output .= '<img loading="lazy" src="' . url('assets/dashboard/img/default-avatar.png') . '" width="36" height="36" alt="author">';
                 }
 
                 $output .= '<div class="author-date">
@@ -567,7 +481,7 @@ class CommentController extends Controller
                 if (isset($comment->profileImage->profile_image)) {
                     $output .= '<img loading="lazy" src="' . url('images/profile', $comment->profileImage->profile_image) . '" class="avatar-35 rounded-circle img-fluid">';
                 } else {
-                    $output .= '<img loading="lazy" src="' . url('assets/dashboard/images/user/01.jpg') . '" class="avatar-35 rounded-circle img-fluid">';
+                    $output .= '<img loading="lazy" src="' . url('assets/dashboard/img/default-avatar.png') . '" class="avatar-35 rounded-circle img-fluid">';
                 }
 
                 $output .= '</div>';

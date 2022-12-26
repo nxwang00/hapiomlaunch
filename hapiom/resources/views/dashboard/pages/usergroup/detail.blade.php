@@ -9,7 +9,7 @@
 <div class="header-for-bg  bg-white shadow-sm pb-2">
     <div class="background-header position-relative">
         <div class="d-flex justify-content-center">
-            @if (isset($group->image))
+            @if (isset($group->image) && file_exists('images/group/'.$group->image))
             <img src="{{ url('images/group/'.$group->image) }}" class="img-fluid" alt="header-bg" style="width: 60%; max-height:450px; border-radius: 0 0 15px 15px">
             @endif
         </div>
@@ -18,17 +18,20 @@
                 <h3>{{ $group->name }}</h3>
                 <div class="justify-content-end">
                     @if (isset($groupUser))
-                    @if ($groupUser->status === 0)
-                    <button type="button" class="btn btn-secondary" onclick="cancelRequest({{$group->id}})">Cancel request</button>
-                    @elseif ($groupUser->status === 1)
-                    <a href="{{ route('get-events', $group->id) }}" type="button" class="btn btn-warning life-event-btn">Life Event</a>
-                    <a href="{{ route('get-photos', $group->id) }}" type="button" class="btn btn-primary">Photos</a>
-                    <button type="button" class="btn btn-outline-danger" group_id="{{ $group->id }}" route="{{ route('user-leave-group') }}">Leave group</button>
-                    @elseif ($groupUser->status === 2)
-                    <button type="button" class="btn btn-primary" onclick="joinGroup({{ json_encode($group) }})"><i class="fa fa-user-plus" aria-hidden="true"></i> Join group</button>
-                    @endif
+                        @if ($groupUser->status === 0)
+                        <button type="button" class="btn btn-secondary" onclick="cancelRequest({{$group->id}})">Cancel request</button>
+                        @elseif ($groupUser->status === 1)
+                        <a href="{{ route('get-events', $group->id) }}" type="button" class="btn btn-warning life-event-btn">Life Event</a>
+                        <a href="{{ route('get-photos', $group->id) }}" type="button" class="btn btn-primary">Photos</a>
+                        <button type="button" class="btn btn-outline-danger" group_id="{{ $group->id }}" route="{{ route('user-leave-group') }}">Leave group</button>
+                        @elseif ($groupUser->status === 2)
+                        <button type="button" class="btn btn-primary" onclick="joinGroup({{ json_encode($group) }})"><i class="fa fa-user-plus" aria-hidden="true"></i> Join group</button>
+                        @endif
                     @else
                     <button type="button" class="btn btn-primary" onclick="joinGroup({{ json_encode($group) }})"><i class="fa fa-user-plus" aria-hidden="true"></i> Join group</button>
+                    @endif
+                    @if ($group->created_by == Auth::user()->id)
+                    <a href="{{ route('group.info', $group->id) }}" type="button" class="btn btn-danger"><i class="fa fa-info" aria-hidden="true"></i>Group info</a>
                     @endif
                 </div>
             </div>

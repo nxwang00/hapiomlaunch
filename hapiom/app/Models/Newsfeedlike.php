@@ -18,6 +18,7 @@ class Newsfeedlike extends Model
         'newsfeed_id',
         'user_id',
         'likes_id',
+        'face_icon',
     ];
 
     public function NewsfeedUser()

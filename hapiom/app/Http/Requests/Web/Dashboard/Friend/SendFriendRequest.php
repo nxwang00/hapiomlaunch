@@ -71,7 +71,7 @@ class SendFriendRequest
     {
         return [
             'request_from'       => Auth::user()->id,
-            'request_to'         => $this->request->user->id,
+            'request_to'         => $this->request->user_id,
             'friendrequesttatus' => 0,
         ];
     }

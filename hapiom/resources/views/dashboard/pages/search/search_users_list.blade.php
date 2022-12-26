@@ -74,7 +74,7 @@
 								</div>
 								<div class="friend-avatar">
 									<div class="author-thumb">
-									    @if(isset($result->userInfo->profile_image))
+									    @if(isset($result->userInfo->profile_image) && file_exists('images/profile/'. $result->userInfo->profile_image))
 											<img loading="lazy" src="{{ url('images/profile/',$result->userInfo->profile_image) }}" alt="author" width="92" height="92">
 										@else
 											<img loading="lazy" src="{{ url('assets/dashboard/img/noimage.jpg') }}" alt="author" width="92" height="92">

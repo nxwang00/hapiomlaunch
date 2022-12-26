@@ -36,6 +36,11 @@ class UserController extends Controller
         return view('dashboard.pages.user.admin-add');
     }
 
+    public function editUser(Request $request,$id) {
+        $adminUser = User::findOrFail($id);
+        return view('dashboard.pages.user.admin-edit', ['admin_user' => $adminUser]);
+    }
+    
     public function adminRegistration(Request $request)
     {
 
@@ -55,6 +60,25 @@ class UserController extends Controller
         return back();
     }
 
+    public function adminUpdate(Request $request, $id)
+    {
+
+        $request->validate([
+            'first_name' => 'required',
+            'last_name' => 'required',
+            'company_name' => 'required',
+            'email' => 'required|email',
+            'group_type' => 'required',
+
+        ]);
+        $user = User::findOrFail($id);
+        $user->update($this->updateData($request));
+       
+        $user->save();
+        flashWebResponse('message', 'Admin User edit successfully.!');
+        return back();
+    }
+    
     public function createData(array $data)
     {
       return User::create([
@@ -71,6 +95,18 @@ class UserController extends Controller
         'meberships_id' => 4,
         'edate' => Carbon::now()->addDays(14),
       ]);
+    }
+
+    public function updateData(Request $request): array
+    {
+        return [
+            'first_name'     => $request->input('first_name'), 
+            'last_name'     => $request->input('last_name'),
+            'company_name'     => $request->input('company_name'),
+            'email'     => $request->input('email'),
+            'group_type'     => $request->input('group_type'),
+            'status' => $request->input('status')
+        ];
     }
 
     public function blockUser(BlockRequest $request, User $user)

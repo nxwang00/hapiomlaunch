@@ -17,11 +17,11 @@
 									<div class="chat-search pt-3 pl-3">
 										<div class="d-flex align-items-center">
 											<div class="chat-profile mr-3">
-											@if (isset(Auth::user()->userInfo->profile_image))
+												@if (isset(Auth::user()->userInfo->profile_image))
 												<img src="{{ url('images/profile/' . Auth::user()->userInfo->profile_image) }}" alt="chat-user" class="avatar-60 ">
-											@else
+												@else
 												<img src="{{url('assets/dashboard/img/default-avatar-1.png')}}" alt="chatuserimage" class="avatar-50">
-											@endif
+												@endif
 											</div>
 											<div class="chat-caption">
 												<h5 class="mb-0">{{ Auth::user()->name }}</h5>
@@ -65,7 +65,7 @@
 										</div>
 										<div class="chat-searchbar mt-4">
 											<div class="form-group chat-search-data m-0">
-												<input type="text" class="form-control round" id="chat-search" placeholder="Search">
+												<input type="text" class="form-control round" id="chat-search" placeholder="Search" onkeydown="chatUserSearch(event)"/>
 												<i class="ri-search-line"></i>
 											</div>
 										</div>
@@ -75,32 +75,32 @@
 										<h5 class="mt-3">Direct Message</h5>
 										<ul class="iq-chat-ui nav flex-column nav-pills">
 											@if (count($users) === 0)
-				                <li>No users</li>
-				              @else
-				              @foreach ($users as $user)
-											<li>
-												<a href="javascript:selectChatUser({{ $user->id }})">
-													<div class="d-flex align-items-center">
-														<div class="avatar mr-2">
-															@if (isset($user->userInfo->profile_image))
+											<li>No users</li>
+											@else
+												@foreach ($users as $user)
+												<li>
+													<a href="javascript:selectChatUser({{ $user->id }})">
+														<div class="d-flex align-items-center">
+															<div class="avatar mr-2">
+																@if (isset($user->userInfo->profile_image))
 																<img src="{{url('images/profile/'.$user->userInfo->profile_image)}}" alt="chatuserimage" class="avatar-40" style="border-radius: 50%;">
-															@else
-																<img src="{{url('assets/dashboard/img/default-avatar.png')}}" alt="chatuserimage" class="avatar-40">
-															@endif
-														</div>
-														<div class="chat-sidebar-name">
-															<h6 class="mb-0">{{ ucfirst($user->first_name).' '.ucfirst($user->last_name) }}
-																@if ($user->unreads > 0)
-																<span class="badge badge-secondary float-right text-light mr-2" id="unreads_{{$user->id}}" style="display: block">{{$user->unreads}}</span>
 																@else
-																<span class="badge badge-secondary float-right text-light mr-2" id="unreads_{{$user->id}}" style="display: none">{{$user->unreads}}</span>
+																<img src="{{url('assets/dashboard/img/default-avatar.png')}}" alt="chatuserimage" class="avatar-40">
 																@endif
-															</h6>
+															</div>
+															<div class="chat-sidebar-name">
+																<h6 class="mb-0">{{ ucfirst($user->first_name).' '.ucfirst($user->last_name) }}
+																	@if ($user->unreads > 0)
+																	<span class="badge badge-secondary float-right text-light mr-2" id="unreads_{{$user->id}}" style="display: block">{{$user->unreads}}</span>
+																	@else
+																	<span class="badge badge-secondary float-right text-light mr-2" id="unreads_{{$user->id}}" style="display: none">{{$user->unreads}}</span>
+																	@endif
+																</h6>
+															</div>
 														</div>
-													</div>
-												</a>
-											</li>
-											@endforeach
+													</a>
+												</li>
+												@endforeach
 											@endif
 										</ul>
 									</div>
@@ -111,21 +111,21 @@
 											<div class="chat-start">
 												<span class="iq-start-icon text-primary"><i class="ri-message-3-line"></i></span>
 												<button id="chat-start" class="btn bg-white mt-3">Start
-												Conversation!</button>
+													Conversation!</button>
 											</div>
 										</div>
 										<div class="tab-pane fade" id="chat-block" role="tabpanel">
-											<?php  if(isset($otherUser->first_name)) { ?>
-											<div class="col col-xl-7 col-lg-6 col-md-12 col-sm-12 col-12">
+											<?php if (isset($otherUser->first_name)) { ?>
+												<div class="col col-xl-7 col-lg-6 col-md-12 col-sm-12 col-12">
 
-												<!-- Chat Field -->
+													<!-- Chat Field -->
 
-												<chat-messages :auth-user="{{ auth()->user() }}" :other-user="{{$otherUser}}" :image-src="'{{url('/')}}'"></chat-messages>
+													<chat-messages :auth-user="{{ auth()->user() }}" :other-user="{{$otherUser}}" :image-src="'{{url('/')}}'"></chat-messages>
 
-												<!-- ... end Chat Field -->
+													<!-- ... end Chat Field -->
 
-											</div>
-					 						<?php } ?>
+												</div>
+											<?php } ?>
 											<div class="chat-head">
 												<header class="d-flex justify-content-between align-items-center bg-white pt-3 pl-3 pr-3 pb-3">
 													<div class="d-flex align-items-center">
@@ -195,7 +195,7 @@
 											<div class="chat-content scroller">
 											</div>
 											<div class="chat-footer p-3 bg-white">
-												<form class="d-flex align-items-center"  action="javascript:void(0);">
+												<form class="d-flex align-items-center" action="javascript:void(0);">
 													<div class="chat-attagement d-flex">
 														<a href="javascript:void();"><i class="fa fa-smile-o pr-3" aria-hidden="true"></i></a>
 														<a href="javascript:void();"><i class="fa fa-paperclip pr-3" aria-hidden="true"></i></a>
@@ -221,53 +221,53 @@
 
 @endsection
 @section('page-js-link')
-	<script type="text/javascript" src="{{ asset('socket/socket.io.min.js') }}"></script>
+<script type="text/javascript" src="{{ asset('socket/socket.io.min.js') }}"></script>
 @endsection
 @section('page-js')
-	<script>
-		var chatUsers = {!! json_encode($users, JSON_HEX_TAG) !!};
-		var partner = {!! json_encode($partner, JSON_HEX_TAG) !!};
-		var userIdStr = "<?php echo Auth::id(); ?>";
-		var userId = parseInt(userIdStr);
-		var receiverId = "";
+<script>
+	var chatUsers = {!! json_encode($users, JSON_HEX_TAG) !!};
+	var partner = {!! json_encode($partner, JSON_HEX_TAG) !!};
+	var userIdStr = "<?php echo Auth::id(); ?>";
+	var userId = parseInt(userIdStr);
+	var receiverId = "";
 
-		var socket = io.connect("https://hapiom.com", {path: '/nodesock/socket.io/'});
-		$(document).ready(function() {
+	var socket = io.connect("https://hapiom.com", {path: '/nodesock/socket.io/'});
+	// var socket = io.connect("http://localhost:4000");
+	$(document).ready(function() {
+		if (partner) {
+			selectChatUser(parseInt(partner));
+		}
 
-			if (partner) {
-				selectChatUser(parseInt(partner));
-			}
+		socket.on('requestUser', (data) => {
+			socket.emit('registerUser', {
+				userId,
+			});
+		})
 
-			socket.on('requestUser', (data) =>{
-				socket.emit('registerUser', {
-					userId,
-				});
-			})
-
-			socket.on('newMessage', (data) =>{
-				// if current user is not choosing the recever
-				if (receiverId !== data.senderId) {
-					var isShowBadge = $("#unreads_" + data.senderId).css('display');
-					if (isShowBadge === "none") {
-						$("#unreads_" + data.senderId).html(1);
-						$("#unreads_" + data.senderId).css('display', 'block');
-					} else {
-						var unreadMsgNums = parseInt($("#unreads_" + data.senderId).html());
-						unreadMsgNums += 1;
-						$("#unreads_" + data.senderId).html(unreadMsgNums);
-					}
+		socket.on('newMessage', (data) => {
+			// if current user is not choosing the recever
+			if (receiverId !== data.senderId) {
+				var isShowBadge = $("#unreads_" + data.senderId).css('display');
+				if (isShowBadge === "none") {
+					$("#unreads_" + data.senderId).html(1);
+					$("#unreads_" + data.senderId).css('display', 'block');
 				} else {
-					const now = new Date();
-					const receiveTime = now.getHours() + ':' + now.getMinutes();
-					const senderId = data.senderId;
+					var unreadMsgNums = parseInt($("#unreads_" + data.senderId).html());
+					unreadMsgNums += 1;
+					$("#unreads_" + data.senderId).html(unreadMsgNums);
+				}
+			} else {
+				const now = new Date();
+				const receiveTime = now.getHours() + ':' + now.getMinutes();
+				const senderId = data.senderId;
 
-					const chatUser = chatUsers.find(cuser => cuser.id === senderId);
-					const chatUserProfile = chatUser.profile_image;
-					const profileLink = chatUserProfile ? "<?php echo url('images/profile') ?>" + "/" + chatUserProfile :
+				const chatUser = chatUsers.find(cuser => cuser.id === senderId);
+				const chatUserProfile = chatUser.profile_image;
+				const profileLink = chatUserProfile ? "<?php echo url('images/profile') ?>" + "/" + chatUserProfile :
 					"<?php echo url('assets/dashboard/img/default-avatar-1.png'); ?>";
 
-					var newMsgElement =
-						`<div class="chat chat-left">
+				var newMsgElement =
+					`<div class="chat chat-left">
 							<div class="chat-user" style="margin-top:32px">
 								<a class="avatar m-0">
 									<img src="${profileLink}" alt="avatar" class="avatar-35 ">
@@ -281,19 +281,19 @@
 							</div>
 						</div>`;
 
-					$(".chat-content").append(newMsgElement);
-				}
-			})
+				$(".chat-content").append(newMsgElement);
+			}
+		})
 
-			$("#sendMsgBtn").on('click', () => {
-				const msgText = $("#sendMsgTxt").val();
-				if (!msgText) return;
+		$("#sendMsgBtn").on('click', () => {
+			const msgText = $("#sendMsgTxt").val();
+			if (!msgText) return;
 
-				const now = new Date();
-				const sendTime = now.getHours() + ':' + now.getMinutes();
+			const now = new Date();
+			const sendTime = now.getHours() + ':' + now.getMinutes();
 
-				var newMsgElement =
-					`<div class="chat">
+			var newMsgElement =
+				`<div class="chat">
 						<div class="chat-time text-right" style="margin-right: 32px">${sendTime}</div>
 						<div class="chat-detail">
 							<div class="chat-message">
@@ -302,74 +302,78 @@
 						</div>
 					</div>`;
 
-				$(".chat-content").append(newMsgElement);
+			$(".chat-content").append(newMsgElement);
 
-				$("#sendMsgTxt").val("");
+			$("#sendMsgTxt").val("");
 
-				socket.emit('newMessage', {
-					body: msgText,
-					senderId: userId,
-					receiverId: receiverId,
-				});
-			})
-
-			$("#sendMsgTxt").keydown(function(){
-				if ($(this).val())
-					$("#sendMsgBtn").removeAttr('disabled');
-				else
-					$("#sendMsgBtn").attr('disabled', 'true');
+			socket.emit('newMessage', {
+				body: msgText,
+				senderId: userId,
+				receiverId: receiverId,
 			});
 		})
 
-		function selectChatUser(chatUserId) {
-			$("#default-block").removeClass('active show');
-			$("#chat-block").addClass('active show');
-			// remove the badge for unread message number
-			$("#unreads_"+chatUserId).css('display', 'none');
+		$("#sendMsgTxt").keydown(function() {
+			if ($(this).val())
+				$("#sendMsgBtn").removeAttr('disabled');
+			else
+				$("#sendMsgBtn").attr('disabled', 'true');
+		});
 
-			// change the chatting user's image and name
-			const chatUser = chatUsers.find(cuser => cuser.id === chatUserId);
-			const chatUserProfile = chatUser.profile_image;
-			const profileLink = chatUserProfile ? "<?php echo url('images/profile') ?>" + "/" + chatUserProfile :
+		const urlParams = new URLSearchParams(window.location.search);
+		const param_x = urlParams.get('chat-search');
+		$('#chat-search').val(param_x);
+	})
+
+	function selectChatUser(chatUserId) {
+		$("#default-block").removeClass('active show');
+		$("#chat-block").addClass('active show');
+		// remove the badge for unread message number
+		$("#unreads_" + chatUserId).css('display', 'none');
+
+		// change the chatting user's image and name
+		const chatUser = chatUsers.find(cuser => cuser.id === chatUserId);
+		const chatUserProfile = chatUser.profile_image;
+		const profileLink = chatUserProfile ? "<?php echo url('images/profile') ?>" + "/" + chatUserProfile :
 			"<?php echo url('assets/dashboard/img/default-avatar-1.png'); ?>";
-			$(".chat_user_avatar").attr('src', profileLink);
-			$(".chat_user_name").html(chatUser.name);
+		$(".chat_user_avatar").attr('src', profileLink);
+		$(".chat_user_name").html(chatUser.name);
 
-			let chatUserAddress = "";
-			if (chatUser.user_info && chatUser.user_info.city)
-				chatUserAddress += chatUser.user_info.city;
-			if (chatUser.user_info && chatUser.user_info.country)
-				chatUserAddress += ", " + chatUser.user_info.country;
-			$("#chat_user_address").html(chatUserAddress)
+		let chatUserAddress = "";
+		if (chatUser.user_info && chatUser.user_info.city)
+			chatUserAddress += chatUser.user_info.city;
+		if (chatUser.user_info && chatUser.user_info.country)
+			chatUserAddress += ", " + chatUser.user_info.country;
+		$("#chat_user_address").html(chatUserAddress)
 
-			$("#chat_user_tel").html(chatUser.user_info ? chatUser.user_info.phone_number : "");
-			$("#chat_user_birthday").html(chatUser.user_info? chatUser.user_info.dob : "");
+		$("#chat_user_tel").html(chatUser.user_info ? chatUser.user_info.phone_number : "");
+		$("#chat_user_birthday").html(chatUser.user_info ? chatUser.user_info.dob : "");
 
-			let gender = "";
-			if (chatUser.user_info)
-				if (chatUser.user_info.gender === "1")
-					gender = "Male";
-				else if (chatUser.user_info.gender === "0")
-					gender = "Female";
+		let gender = "";
+		if (chatUser.user_info)
+			if (chatUser.user_info.gender === "1")
+				gender = "Male";
+			else if (chatUser.user_info.gender === "0")
+			gender = "Female";
 
-			$("#chat_user_gender").html(gender);
+		$("#chat_user_gender").html(gender);
 
-			const data = {
-				chatUserId,
-				previousChatUserId: receiverId,
-				"_token": "{{ csrf_token() }}",
-			}
-			receiverId = chatUserId;
-			$.post("{{ route('messages-fetch') }}", data, (msgs, status) => {
-				$(".chat-content").empty();
-				let msgElements = "";
-				for (let msg of msgs) {
-					const createdAt = msg.created_at;
-					const created = createdAt.split("T");
-					const createdTimes = created[1].split(":");
-					if (msg.receiver_id === chatUserId) {
-						msgElements +=
-							`<div class="chat">
+		const data = {
+			chatUserId,
+			previousChatUserId: receiverId,
+			"_token": "{{ csrf_token() }}",
+		}
+		receiverId = chatUserId;
+		$.post("{{ route('messages-fetch') }}", data, (msgs, status) => {
+			$(".chat-content").empty();
+			let msgElements = "";
+			for (let msg of msgs) {
+				const createdAt = msg.created_at;
+				const created = createdAt.split("T");
+				const createdTimes = created[1].split(":");
+				if (msg.receiver_id === chatUserId) {
+					msgElements +=
+						`<div class="chat">
 								<div class="chat-time text-right" style="margin-right: 32px">${createdTimes[0] + ":" + createdTimes[1]}</div>
 								<div class="chat-detail">
 									<div class="chat-message">
@@ -377,9 +381,9 @@
 									</div>
 								</div>
 							</div>`;
-					} else if (msg.user_id === chatUserId) {
-						msgElements +=
-							`<div class="chat chat-left">
+				} else if (msg.user_id === chatUserId) {
+					msgElements +=
+						`<div class="chat chat-left">
 								<div class="chat-user" style="margin-top:32px">
 									<a class="avatar m-0">
 										<img src="${profileLink}" alt="avatar" class="avatar-35 ">
@@ -392,10 +396,18 @@
 									</div>
 								</div>
 							</div>`
-					}
 				}
-				$(".chat-content").append(msgElements);
-			});
+			}
+			$(".chat-content").append(msgElements);
+		});
+	}
+
+	function chatUserSearch(event) {
+		if (event.keyCode == 13) {
+			let searchKey = $('#chat-search').val();
+			location.href = ("{{url()->current()}}" + '?chat-search=' + searchKey);
 		}
-	</script>
+	}
+
+</script>
 @endsection

@@ -138,6 +138,8 @@ Route::group(['middleware' => ['auth']], function () {
         Route::get('/users/list/{user}', 'userList')->name('user.list');
         Route::get('/user/block/{user}', 'blockUser')->name('user.block');
         Route::get('/user/unblock/{user}', 'unblockUser')->name('user.unblock');
+        Route::get('/user/edit/{user}', 'editUser')->name('user-edit');
+        Route::post('/user/admin-update/{user}', 'adminUpdate')->name('admin.update');
         Route::get('/user/delete/{user}', 'delete')->name('user-delete');
         Route::get('/user/details/{user}', 'admindetails')->name('user.viewdetails');
         Route::post('/user/addcomment', 'addUserComment')->name('user.addcomment');
@@ -178,7 +180,7 @@ Route::group(['middleware' => ['auth']], function () {
      */
     Route::controller(GroupMasterController::class)->group(function () {
         Route::get('/group', 'index')->name('group');
-        Route::get('/group/{id}', 'showGroupUsers')->name('group-users.show');
+        Route::get('/group/show/{id}', 'showGroupUsers')->name('group-users.show');
         Route::get('/group/create', 'create')->name('group-create');
         Route::post('/group/store', 'store')->name('group-save');
         Route::get('/group/edit/{id}', 'edit')->name('group-edit');
@@ -267,6 +269,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::controller(ProfileController::class)->group(function () {
         // Route::get('/profile', 'index')->name('profile');
         // Route::get('/profile-setting', 'profileSetting')->name('profile-setting');
+        Route::post('profile/profile-image-upload','saveProfileImageUpload')->name('profile-image-upload-save');
         Route::get('/profile-setting', 'personalInformation')->name('profile-setting');
         Route::get('/personal-information', 'personalInformation')->name('personal-information');
         Route::post('/personal-information/store', 'store')->name('personal-information-save');
@@ -425,6 +428,7 @@ Route::group(['middleware' => ['auth']], function () {
         Route::post('/user/join-group', 'joinGroup')->name('user-join-group');
         Route::post('/user/leave-group', 'leaveGroup')->name('user-leave-group');
         Route::post('/user-group/pay', 'payGroup')->name('user-pay-group');
+        Route::get('/user-group/group-info/{id}', 'showGroupInfo')->name('group.info');
         Route::get('/user/group-detail-leave/{id}', 'leaveGroupDetail')->name('leave-group-detail');
         Route::get('/user/group-detail-join/{id}', 'joinGroupDetail')->name('join-group-detail');
     });

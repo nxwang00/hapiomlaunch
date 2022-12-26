@@ -53,7 +53,7 @@
                             @foreach(Auth::user()->friendSuggestion() as $user)
                             <li class="d-flex align-items-center add-friend-list-{{ $user->id }}">
                                 <div class="user-img img-fluid">
-                                    @if(isset($user->userInfo->profile_image))
+                                    @if(isset($user->userInfo->profile_image) && file_exists('images/profile/'. $user->userInfo->profile_image))
                                     <img src="{{ url('images/profile/',$user->userInfo->profile_image) }}" alt="story-img" class="rounded-circle avatar-40">
                                     @else
                                     <img src="{{ url('assets/dashboard/images/user/04.jpg') }}" alt="profile-img" class="rounded-circle avatar-40" />

@@ -14,11 +14,12 @@
     <link rel="stylesheet" href="{{ url('assets/dashboard/css/typography.css') }}">
     <!-- Style CSS -->
     <link rel="stylesheet" href="{{ url('assets/dashboard/css/style.css') }}">
+    <link href="{{ url('assets/dashboard/css/faceMocion.css') }}" rel="stylesheet" type="text/css" />
     <!-- Responsive CSS -->
     <link rel="stylesheet" href="{{ url('assets/dashboard/css/responsive.css') }}">
     <link rel="stylesheet" href="{{ url('assets/dashboard/toastr/toastr.min.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
-
+    <link rel="stylesheet" href="{{ url('assets/dashboard/css/croppie.css') }}">
     @yield('page-css-link')
     @yield('page-css')
 
@@ -52,7 +53,21 @@
                </div>
             </div>
          </div> -->
+        @php
+        $friends = App\Models\Friendlist::where('user_id', Auth::id())->get();
+        $users = [];
+        foreach($friends as $friend)
+        {
+            $user = App\Models\User::find($friend->friend_id);
+            $userinfo = App\Models\Userinfo::where('user_id', $friend->friend_id)->first();
+            $user->profile_image = isset($userinfo) ? $userinfo->profile_image : "";
 
+            $unread_messages = App\Models\Message::where('user_id', $friend->friend_id)->where('receiver_id', Auth::id())->where('is_seen', 0)->get();
+            $user->unreads = count($unread_messages);
+            array_push($users, $user);
+        }
+        @endphp
+        <div id="chat-msg"></div>
     </div>
     <!-- Wrapper END -->
     <!-- Footer -->
@@ -90,9 +105,10 @@
     <script src="{{ url('assets/dashboard/js/chart-custom.js') }}"></script>
     <!-- Custom JavaScript -->
     <script src="{{ url('assets/dashboard/js/custom.js') }}"></script>
-
+    <script src="{{ url('assets/dashboard/js/croppie.js') }}"></script>
     <script src="{{ url('assets/dashboard/toastr/toastr.min.js') }}"></script>
-
+    <script type="text/javascript" src="{{ asset('socket/socket.io.min.js') }}"></script>
+    <script src="{{ url('assets/dashboard/js/faceMocion.js') }}"></script> 
     <script type="text/javascript">
         $(document).on('click', '.accept-friend-request', function() {
             toastr.options = {
@@ -324,6 +340,208 @@
                     $('#image-size-warning').text('');
                 }
             }
+        }
+
+
+        var chatUsers = {!! json_encode($users, JSON_HEX_TAG) !!};
+		var userIdStr = "<?php echo Auth::id(); ?>";
+		var userId = parseInt(userIdStr);
+		var receiverId = "";
+
+		var socket = io.connect("http://localhost:4000")
+		$(document).ready(function() {
+			socket.on('requestUser', (data) =>{
+				socket.emit('registerUser', {
+					userId,
+				});
+			})
+
+			socket.on('newMessage', (data) =>{
+				// if current user is not choosing the recever
+				if (receiverId !== data.senderId) {
+					var isShowBadge = $("#unreads_" + data.senderId).css('display');
+					if (isShowBadge === "none") {
+						$("#unreads_" + data.senderId).html(1);
+						$("#unreads_" + data.senderId).css('display', 'block');
+					} else {
+						var unreadMsgNums = parseInt($("#unreads_" + data.senderId).html());
+						unreadMsgNums += 1;
+						$("#unreads_" + data.senderId).html(unreadMsgNums);
+					}
+				} else {
+					const now = new Date();
+					const receiveTime = now.getHours() + ':' + now.getMinutes();
+					const senderId = data.senderId;
+
+					const chatUser = chatUsers.find(cuser => cuser.id === senderId);
+					const chatUserProfile = chatUser.profile_image;
+					const profileLink = chatUserProfile ? "<?php echo url('images/profile') ?>" + "/" + chatUserProfile :
+					"<?php echo url('assets/dashboard/img/default-avatar-1.png'); ?>";
+
+					var newMsgElement =
+						`<div class="chat chat-left">
+							<div class="chat-user" style="margin-top:32px">
+								<a class="avatar m-0">
+									<img src="${profileLink}" alt="avatar" class="avatar-35 ">
+								</a>
+							</div>
+							<div class="chat-time text-left" style="margin-left:52px">${receiveTime}</div>
+							<div class="chat-detail">
+								<div class="chat-message">
+									<p>${data.body}</p>
+								</div>
+							</div>
+						</div>`;
+
+					$("#" + chatUser.id + " " + ".chat-content-d").append(newMsgElement);
+				}
+			})
+		})
+
+        function sendMsg(event, id) {
+            let msgText
+            if (event.keyCode == 13) {
+                msgText = $("#" + id + " " + "#sendMsgTxt").val();
+                if (!msgText) return;
+                const now = new Date();
+                const sendTime = now.getHours() + ':' + now.getMinutes();
+                var newMsgElement =
+                    `<div class="chat">
+                        <div class="chat-time text-right" style="margin-right: 32px; color: white;">${sendTime}</div>
+                        <div class="chat-detail">
+                            <div class="chat-message">
+                                <p>${msgText}</p>
+                            </div>
+                        </div>
+                    </div>`;
+                $("#" + id + " " + ".chat-content-d").append(newMsgElement);
+
+                $("#" + id + " " + "#sendMsgTxt").val("");
+
+                socket.emit('newMessage', {
+                    body: msgText,
+                    senderId: userId,
+                    receiverId: receiverId,
+                });
+            }
+        }
+		function selectChatUser(chatUserId) {
+			let newChat = `<div class="chat-block" id="`+ chatUserId +`">
+                <div class="chat-head" style="background-color: green;">
+                    <header class="d-flex justify-content-between align-items-center bg-white pt-3 pl-3 pr-3 pb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="sidebar-toggle">
+                                <i class="ri-menu-3-line"></i>
+                            </div>
+                            <div class="avatar chat-user-profile m-0 mr-3">
+                                <img src="{{ url('assets/dashboard/images/user/10.jpg') }}" alt="avatar" class="avatar-50 chat_user_avatar">
+                                <span class="avatar-status"><i class="ri-checkbox-blank-circle-fill text-success"></i></span>
+                            </div>
+                            <h5 class="mb-0 chat_user_name">Paul Molive</h5>
+                        </div>
+                        <div class="chat-header-icons d-flex">
+                            <i class="ri-close-line cursor-pointer" id="closeChatBtn`+ chatUserId +`" ></i>
+                        </div>
+                    </header>
+                </div>
+                <div class="chat-content-d scroller">
+                </div>
+                <div class="chat-footer p-3 bg-white">
+                    <form class="d-flex align-items-center"  action="javascript:void(0);">
+                        <div class="chat-attagement d-flex">
+                            <a href="javascript:void();"><i class="fa fa-smile-o pr-3" aria-hidden="true"></i></a>
+                            <a href="javascript:void();"><i class="fa fa-paperclip pr-3" aria-hidden="true"></i></a>
+                        </div>
+                        <input type="text" class="form-control mr-3" placeholder="Type your message" id="sendMsgTxt" onkeydown="sendMsg(event, `+ chatUserId + `)">
+                    </form>
+                </div>
+            </div>`;
+            //$('#chat-msg').append(newChat);
+            if ($('#chat-msg').find('#' + chatUserId).length == 0) {
+                $('#chat-msg').append(newChat);
+            }
+            $('#closeChatBtn' + chatUserId).on('click', function() {
+                $('#chat-msg').find('#' + chatUserId).remove();
+            });
+			// remove the badge for unread message number
+			$("#unreads_"+chatUserId).css('display', 'none');
+
+			// // change the chatting user's image and name
+			const chatUser = chatUsers.find(cuser => cuser.id === chatUserId);
+			const chatUserProfile = chatUser.profile_image;
+			const profileLink = chatUserProfile ? "<?php echo url('images/profile') ?>" + "/" + chatUserProfile :
+			"<?php echo url('assets/dashboard/img/default-avatar-1.png'); ?>";
+			$("#" + chatUserId + " " + ".chat_user_avatar").attr('src', profileLink);
+			$("#" + chatUserId + " " + ".chat_user_name").html(chatUser.name);
+
+			const data = {
+				chatUserId,
+				previousChatUserId: receiverId,
+				"_token": "{{ csrf_token() }}",
+			}
+			receiverId = chatUserId;
+			$.post("{{ route('messages-fetch') }}", data, (msgs, status) => {
+				$("#" + chatUserId + " " + ".chat-content-d").empty();
+				let msgElements = "";
+				for (let msg of msgs) {
+					const createdAt = msg.created_at;
+					const created = createdAt.split("T");
+					const createdTimes = created[1].split(":");
+					if (msg.receiver_id === chatUserId) {
+						msgElements +=
+							`<div class="chat">
+								<div class="chat-time text-right" style="margin-right: 32px">${createdTimes[0] + ":" + createdTimes[1]}</div>
+								<div class="chat-detail">
+									<div class="chat-message">
+										<p>${msg.message}</p>
+									</div>
+								</div>
+							</div>`;
+					} else if (msg.user_id === chatUserId) {
+						msgElements +=
+							`<div class="chat chat-left">
+								<div class="chat-user" style="margin-top:32px">
+									<a class="avatar m-0">
+										<img src="${profileLink}" alt="avatar" class="avatar-35 ">
+									</a>
+								</div>
+								<div class="chat-time text-left" style="margin-left:52px">${createdTimes[0] + ":" + createdTimes[1]}</div>
+								<div class="chat-detail">
+									<div class="chat-message">
+										<p>${msg.message}</p>
+									</div>
+								</div>
+							</div>`
+					}
+				}
+				$("#" + chatUserId + " " + ".chat-content-d").append(msgElements);
+			});
+		}
+
+
+
+        var dropdown = document.getElementsByClassName("dropdown-group-btn");
+        var i;
+
+        for (i = 0; i < dropdown.length; i++) {
+        dropdown[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            console.log(this.lastElementChild.className);
+            if (this.lastElementChild.className == 'las la-plus') {
+                this.lastElementChild.classList.remove('la-plus');
+                this.lastElementChild.classList.add('la-minus');
+            } else {
+                this.lastElementChild.classList.remove('la-minus');
+                this.lastElementChild.classList.add('la-plus');
+            }
+            
+            var dropdownContent = this.nextElementSibling;
+            if (dropdownContent.style.display === "block") {
+            dropdownContent.style.display = "none";
+            } else {
+            dropdownContent.style.display = "block";
+            }
+        });
         }
     </script>
 

@@ -44,7 +44,7 @@
                         <div class="row">
                            <div class="form-group col-md-6">
                               <label for="product_image1">Image:</label>
-                              <div class="custom-file" id="product_image_div">
+                              <div class="custom-file" id="product_image_div" style="z-index: 0;">
                                  <input type="file" class="custom-file-input" id="product_image" name="product_image" required>
                                  <label class="custom-file-label form-control" for="product_image" style="line-height: 30px !important;"></label>
                               </div>
