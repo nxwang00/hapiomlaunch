@@ -348,7 +348,7 @@
 		var userId = parseInt(userIdStr);
 		var receiverId = "";
 
-        var socket = io.connect("https://hapiom.com", {path: '/nodesock/socket.io/'});
+        var socket = io.connect("https://enjoy.hapiom.com", {path: '/nodesock/socket.io/'});
 		// var socket = io.connect("http://localhost:4000")
 		$(document).ready(function() {
 			socket.on('requestUser', (data) =>{
