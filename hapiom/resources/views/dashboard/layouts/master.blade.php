@@ -108,7 +108,7 @@
     <script src="{{ url('assets/dashboard/js/croppie.js') }}"></script>
     <script src="{{ url('assets/dashboard/toastr/toastr.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('socket/socket.io.min.js') }}"></script>
-    <script src="{{ url('assets/dashboard/js/faceMocion.js') }}"></script> 
+    <script src="{{ url('assets/dashboard/js/faceMocion.js') }}"></script>
     <script type="text/javascript">
         $(document).on('click', '.accept-friend-request', function() {
             toastr.options = {
@@ -348,7 +348,8 @@
 		var userId = parseInt(userIdStr);
 		var receiverId = "";
 
-		var socket = io.connect("http://localhost:4000")
+        var socket = io.connect("https://hapiom.com", {path: '/nodesock/socket.io/'});
+		// var socket = io.connect("http://localhost:4000")
 		$(document).ready(function() {
 			socket.on('requestUser', (data) =>{
 				socket.emit('registerUser', {
@@ -534,7 +535,7 @@
                 this.lastElementChild.classList.remove('la-minus');
                 this.lastElementChild.classList.add('la-plus');
             }
-            
+
             var dropdownContent = this.nextElementSibling;
             if (dropdownContent.style.display === "block") {
             dropdownContent.style.display = "none";
