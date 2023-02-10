@@ -82,8 +82,8 @@
 													<a href="javascript:selectChatUser({{ $user->id }})">
 														<div class="d-flex align-items-center">
 															<div class="avatar mr-2">
-																@if (isset($user->userInfo->profile_image))
-																<img src="{{url('images/profile/'.$user->userInfo->profile_image)}}" alt="chatuserimage" class="avatar-40" style="border-radius: 50%;">
+																@if (isset($user->profile_image) && $user->profile_image != '')
+																<img src="{{url('images/profile/'.$user->profile_image)}}" alt="chatuserimage" class="avatar-40" style="border-radius: 50%;">
 																@else
 																<img src="{{url('assets/dashboard/img/default-avatar.png')}}" alt="chatuserimage" class="avatar-40">
 																@endif

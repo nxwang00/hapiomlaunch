@@ -164,7 +164,7 @@ class LoginController extends Controller
             $check = $this->create($data);
         }
 
-        flashWebResponse('message', 'Successful Registration: Please check your email for verification.');
+        flashWebResponse('message', 'Successful Registration: Please check your email for Verification.');
 
         return back();
         // return back()->withErrors(['These credentials do not match our records.']);

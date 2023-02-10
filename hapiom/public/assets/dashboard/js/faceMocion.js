@@ -39,20 +39,22 @@
 
 			$(faceMocion).each(function(index) {
 				var UnicoID = Date.now();
-				$(this).attr("class", $(faceMocion).attr("class") + " " + UnicoID);
-				var EstadoInicial = "alegre";
-				if ($(this).val() != "") {
-					EstadoInicial = $(this).val();
-				} else {
-					$(this).val('alegre');
-				}
-				DescripcionFace = EstadoInicial;
-				ElementoIniciar = '';
-				ElementoIniciar = ElementoIniciar + '<div dato-descripcion="' + DescripcionFace + '" ';
-				ElementoIniciar = ElementoIniciar + 'id-referencia="' + UnicoID;
-				ElementoIniciar = ElementoIniciar + '"  class="' + NombreSelector;
-				ElementoIniciar = ElementoIniciar + ' selectorFace ' + EstadoInicial + '"></div>';
-				$(this).before(ElementoIniciar);
+				if (! $(this).hasClass('dontaddagain')) {
+					$(this).attr("class", $(faceMocion).attr("class") + " " + UnicoID + " dontaddagain");
+					var EstadoInicial = "alegre";
+					if ($(this).val() != "") {
+						EstadoInicial = $(this).val();
+					} else {
+						$(this).val('alegre');
+					}
+					DescripcionFace = EstadoInicial;
+					ElementoIniciar = '';
+					ElementoIniciar = ElementoIniciar + '<div dato-descripcion="' + DescripcionFace + '" ';
+					ElementoIniciar = ElementoIniciar + 'id-referencia="' + UnicoID;
+					ElementoIniciar = ElementoIniciar + '"  class="' + NombreSelector;
+					ElementoIniciar = ElementoIniciar + ' selectorFace ' + EstadoInicial + '"></div>';
+					$(this).before(ElementoIniciar);
+			    }
 			});
 
 
@@ -90,12 +92,13 @@
 				});
 				$(".faceMocion").show();
 			});
+			$(document).off('click', '.faceMocion div');
 			$(document).on("click", ".faceMocion div", function() {
-
-				SelectorEmocion.attr("class", NombreSelector + " selectorFace  " + $(this).attr('class'));
+                SelectorEmocion.attr("class", NombreSelector + " selectorFace  " + $(this).attr('class'));
 
 				ElInputSeleccionado = SelectorEmocion.attr("id-referencia");
-				$("." + ElInputSeleccionado).val($(this).attr('class'));
+				 $("." + ElInputSeleccionado).val($(this).attr('class'));
+                SelectorEmocion.parent().trigger('click');//emoticon should activate likes as well
 
 				if (typeof opciones.callback == "function") {
 					opciones.callback(this);
@@ -103,6 +106,7 @@
 
 
 			});
+
 			$(document).mouseup(function(e) {
 				$(".faceMocion").hide();
 			});

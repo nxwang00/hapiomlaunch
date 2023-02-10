@@ -13,6 +13,7 @@ use App\Models\Event;
 use App\Models\Photo;
 use Illuminate\Foundation\Http\FormRequest;
 use Auth;
+use DB;
 
 class ProfileRequest extends FormRequest
 {
@@ -65,20 +66,48 @@ class ProfileRequest extends FormRequest
 
     public function getProfile(): array
     {
-        $friends_id = Friendlist::select('friend_id')->where('user_id', decrypt($this->user))->pluck('friend_id');
-        $groups_id = GroupUser::select('group_id')->where('user_id',Auth::id())->where('status', 1)->pluck('group_id');
-        $followingCount = NewsfeedFollow::where('following_id', Auth::user()->id)->get()->count();
-        $followerCount = NewsfeedFollow::where('user_id', Auth::user()->id)->get()->count();
+        $user_id = decrypt($this->user);
+        //$friends_id = Friendlist::select('friend_id')->where('user_id', decrypt($this->user))->pluck('friend_id');
+        $groups_id = GroupUser::select('group_id')->where('user_id', $user_id)->where('status', 1)->pluck('group_id');
+        $followingCount = NewsfeedFollow::where('following_id', $user_id)->get()->count();
+        $followerCount = NewsfeedFollow::where('user_id', $user_id)->get()->count();
         return [
-            'user' => User::findOrFail(decrypt($this->user)),
-            'userinfo' => Userinfo::where('user_id',decrypt($this->user))->get(),
-            'profilePosts' => Newsfeed::select('*')->where('user_id',decrypt($this->user))->orderBy('id','desc')->paginate(config()->get('constants.PER_PAGE_RECORD')),
-            'friends' => User::where('id','!=',Auth::user()->id)->whereNotIn('id', $friends_id)->whereNotIn('id', [decrypt($this->user)])->where('role_id',Auth::user()->role_id)->limit(10)->get(),
+            'user' => User::findOrFail($user_id ),
+            'userinfo' => Userinfo::where('user_id', Auth::user()->id )->first(),
+            'profilePosts' => Newsfeed::select('*')->where('user_id', $user_id )->orderBy('id','desc')->paginate(config()->get('constants.PER_PAGE_RECORD')),
+            'friends' => $this->getFriends($user_id), //User::where('id','!=',Auth::user()->id)->whereNotIn('id', $friends_id)->whereNotIn('id', [decrypt($this->user)])->where('role_id',Auth::user()->role_id)->limit(10)->get(),
             'groups' => Groupmaster::whereIn('id', $groups_id)->where('status', 1)->get(),
             'followingCount' => $followingCount,
             'followerCount' => $followerCount,
-            'events' => Event::where('creater_id', decrypt($this->user))->whereDate('start_date', '>', date('y-m-d h:i:s'))->where('status', 1)->where('visible', 0)->orderBy('start_date','asc')->limit(2)->get(),
-            'photos' => Photo::where('creater_id', decrypt($this->user))->where('visible', 0)->get()
+            'events' => Event::where('creater_id', $user_id)->whereDate('start_date', '>', date('y-m-d h:i:s'))->where('status', 1)->where('visible', 0)->orderBy('start_date','asc')->limit(2)->get(),
+            'photos' => Photo::where('creater_id', $user_id)->where('visible', 0)->get()
         ];
+    }
+
+    public function getMoreProfilePosts(): array
+    {
+        $user_id = decrypt($this->user);
+        //$friends_id = Friendlist::select('friend_id')->where('user_id', decrypt($this->user))->pluck('friend_id');
+        /*$groups_id = GroupUser::select('group_id')->where('user_id', $user_id)->where('status', 1)->pluck('group_id');
+        $followingCount = NewsfeedFollow::where('following_id', $user_id)->get()->count();
+        $followerCount = NewsfeedFollow::where('user_id', $user_id)->get()->count();*/
+        return [
+            'user' => User::findOrFail($user_id ),
+            'userinfo' => Userinfo::where('user_id', Auth::user()->id )->first(),
+            'profilePosts' => Newsfeed::select('*')->where('user_id', $user_id )->orderBy('id','desc')->paginate(config()->get('constants.PER_PAGE_RECORD')),
+            /*'friends' => $this->getFriends($user_id), //User::where('id','!=',Auth::user()->id)->whereNotIn('id', $friends_id)->whereNotIn('id', [decrypt($this->user)])->where('role_id',Auth::user()->role_id)->limit(10)->get(),
+            'groups' => Groupmaster::whereIn('id', $groups_id)->where('status', 1)->get(),
+            'followingCount' => $followingCount,
+            'followerCount' => $followerCount,
+            'events' => Event::where('creater_id', $user_id)->whereDate('start_date', '>', date('y-m-d h:i:s'))->where('status', 1)->where('visible', 0)->orderBy('start_date','asc')->limit(2)->get(),
+            'photos' => Photo::where('creater_id', $user_id)->where('visible', 0)->get()*/
+        ];
+    }
+
+    private function getFriends($user_id): array
+    {
+        $query = "SELECT a.*, b.profile_image FROM users a LEFT JOIN userinfos b ON a.id = b.user_id WHERE a.id IN ((SELECT user_id FROM friendlists WHERE friend_id = :somevariable)) AND a.status = 1";
+        $friends = DB::select(DB::raw($query), ['somevariable' => $user_id]);
+        return $friends;
     }
 }

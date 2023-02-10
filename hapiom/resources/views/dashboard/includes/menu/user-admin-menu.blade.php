@@ -8,9 +8,9 @@ $groups = App\Models\Groupmaster::all();
     <li>
         <a href="{{ route('newsfeed') }}" class=" "><i class="las la-newspaper"></i><span>Newsfeed</span></a>
     </li>
-    <li>
+    <!--<li>
         <a href="{{ route('globalnewsfeed') }}" class=" "><i class="las la-user-friends"></i><span>Global News feed</span></a>
-    </li>
+    </li>-->
     <li>
         <a href="{{ Route('chat') }}" class=" "><i class="las la-users"></i><span>Chat</span></a>
     </li>

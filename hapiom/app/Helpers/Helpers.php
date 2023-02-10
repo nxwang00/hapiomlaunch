@@ -80,7 +80,10 @@ if (!function_exists('flashWebResponse')) {
         switch ($status) {
             case 'created':
                 session()->flash('status', "success");
-                session()->flash('text', ucwords($message) . " has been added successfully.");
+                if ($message == 'Polls') {
+                    session()->flash('text', 'Your Poll Was Created');
+                }
+                else { session()->flash('text', ucwords($message) . " has been added successfully."); }
                 break;
             case 'updated':
                 session()->flash('status', "success");
@@ -124,7 +127,7 @@ if (!function_exists('flashWebResponse')) {
                 break;
             case 'store-error':
                 session()->flash('status', "error");
-                session()->flash('text', "You need to create a store first.");
+                session()->flash('text', "Please visit your profile and create a store first.");
                 break;
         }
     }

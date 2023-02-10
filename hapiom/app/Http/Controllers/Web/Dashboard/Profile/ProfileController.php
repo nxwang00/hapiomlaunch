@@ -23,6 +23,7 @@ class ProfileController extends Controller
 
     public function index(ProfileRequest $Request, ProfileDataProvider $provider)
     {
+        
         return view('dashboard.pages.profile.index', $provider->meta());
     }
 
@@ -75,6 +76,7 @@ class ProfileController extends Controller
         $activeTab = $request->active;
 
         $user_info = Userinfo::where('user_id', Auth::user()->id)->first();
+        
         $payment = PaymentSetting::where('user_id', Auth::user()->id)->first();
         $meberships = Meberships::where('levelstatus', 1)->orderBy('amount', 'ASC')->get();
         $currentUserTier = $meberships[0];
@@ -135,13 +137,13 @@ class ProfileController extends Controller
 
     public function aboutProfile()
     {
-
+         
         $user_info = Userinfo::where('user_id', Auth::user()->id)->first();
         return view('customer.about.about', compact('user_info'));
     }
 
     public function friendlistUserProfile(ProfileRequest $request, $user)
-    {
+    { 
         $data = $request->getProfile();
         $shareComponent = \Share::page(
             'https://www.positronx.io/create-autocomplete-search-in-laravel-with-typeahead-js/',
@@ -154,8 +156,15 @@ class ProfileController extends Controller
             ->whatsapp()
             ->reddit();
         $data['shareComponent'] = $shareComponent;
-
+        $data['userstring'] = $user;
+        //wreturn view('dashboard.layouts.profile_posts', $data);
         return view('dashboard.pages.profile.index', $data);
+    }
+
+    public function loadMore(ProfileRequest $request, $user)
+    {
+        $data = $request->getMoreProfilePosts();
+        return view('dashboard.layouts.profile_posts', $data);
     }
 
     public function paymentSetting()

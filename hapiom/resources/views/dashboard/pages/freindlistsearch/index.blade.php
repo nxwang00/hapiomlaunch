@@ -26,7 +26,7 @@
 						</li>
 						<li class="col-md-6 p-0">
 							<a class="nav-link @if($active==='suggest') active @endif" data-toggle="pill" href="#friend-suggests">
-								Friend Suggests
+								Friend Suggestions
 							</a>
 						</li>
 					</ul>
@@ -83,12 +83,13 @@
 					<div class="iq-card">
 						<div class="iq-card-header d-flex justify-content-between">
 							<div class="iq-header-title">
-								<h4 class="card-title">Friends Suggest</h4>
+								<h4 class="card-title">Friends Suggestions</h4>
 							</div>
 						</div>
 						<div class="iq-card-body">
 							<div class="row">
-								@foreach(Auth::user()->friendSuggestion() as $result)
+								 
+								@foreach($friendRepository->friendSuggestions(100) as $result)
 								<div class="col-md-4 mt-4">
 									<div class="iq-card friend-card-{{ $result->id }}">
 										<div class="iq-card-body profile-page p-0">
@@ -97,15 +98,15 @@
 													<div class="user-detail">
 														<div class="profile-detail">
 															<div class="friend-item-img pr-4">
-																@if(isset($result->userInfo->profile_image) && file_exists('images/profile/'. $result->userInfo->profile_image))
-																<img src="{{ url('images/profile/',$result->userInfo->profile_image) }}" alt="profile-img" class="avatar-60 img-fluid rounded-circle" />
+																@if(isset($result->profile_image) && file_exists('images/profile/'. $result->profile_image))
+																<img src="{{ url('images/profile/',$result->profile_image) }}" alt="profile-img" class="avatar-60 img-fluid rounded-circle" />
 																@else
 																<img src="{{ url('assets/dashboard/img/default-avatar.png') }}" alt="profile-img" class="avatar-60 img-fluid rounded-circle" />
 																@endif
 															</div>
 															<div class="user-data-block text-center mt-2">
 																<h4><a href="{{ route('user-profile',encrypt($result->id)) }}">{{ ucwords($result->name) }}</a></h4>
-																<h6>Friends : {{ $result->Userfriends->count() }}</h6>
+																<h6>Friends : {{ $friendRepository->userFriendsCount($result->id) }}</h6>
 																<p></p>
 															</div>
 														</div>

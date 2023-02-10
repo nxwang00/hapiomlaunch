@@ -19,6 +19,7 @@ use App\Models\Payment as PaymentModel;
 use Stripe\StripeClient;
 use App\Models\Event;
 use App\Models\Photo;
+use App\Repositories\Notifications\NotificationsRepository;
 
 class UserGroupController extends Controller
 {
@@ -45,8 +46,10 @@ class UserGroupController extends Controller
     	return view('dashboard.pages.usergroup.index', compact('groups'));
     }
 
-    public function joinGroup(StoreRequest $request)
+    public function joinGroup(StoreRequest $request, NotificationsRepository $notificationsRepository)
     {
+        $data = $request->only('group_id');
+        $notificationsRepository->userJoinsGroup($data['group_id'], Auth::user()->id);
         if ($request->persist()->getGroup()) {
             flashWebResponse('message', 'Your request to join is pending.');
             return redirect()->route('user-groups');

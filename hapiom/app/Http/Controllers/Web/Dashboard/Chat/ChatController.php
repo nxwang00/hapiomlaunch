@@ -39,8 +39,11 @@ class ChatController extends Controller
                     continue;
                 }
                 $userinfo = Userinfo::where('user_id', $friend->friend_id)->first();
+                
+               
                 $user->profile_image = isset($userinfo) ? $userinfo->profile_image : "";
-
+                
+                 
                 $unread_messages = Message::where('user_id', $friend->friend_id)->where('receiver_id', Auth::id())->where('is_seen', 0)->get();
                 $user->unreads = count($unread_messages);
                 
@@ -55,6 +58,7 @@ class ChatController extends Controller
                 $user = User::find($friend->friend_id);
                 $userinfo = Userinfo::where('user_id', $friend->friend_id)->first();
                 $user->profile_image = isset($userinfo) ? $userinfo->profile_image : "";
+                
 
                 $unread_messages = Message::where('user_id', $friend->friend_id)->where('receiver_id', Auth::id())->where('is_seen', 0)->get();
                 $user->unreads = count($unread_messages);

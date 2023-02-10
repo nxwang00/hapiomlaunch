@@ -192,9 +192,15 @@
                                     @endif
                                     <div class="iq-card">
                                         <div class="iq-card-header d-flex justify-content-between">
+                                        @if ($user->id === Auth::id())
                                             <div class="iq-header-title">
-                                                <h4 class="card-title">Life Event</h4>
+                                                <h4 class="card-title">Create Event</h4>
                                             </div>
+                                            @else
+                                            <div class="iq-header-title">
+                                                <h4 class="card-title">Events</h4>
+                                            </div>
+                                            @endif
                                             @if ($user->id === Auth::id())
                                             <div class="iq-card-header-toolbar d-flex align-items-center">
                                                 <p class="m-0">
@@ -250,7 +256,7 @@
                                             </div>
                                             @if ($user->id === Auth::id())
                                             <div class="iq-card-header-toolbar d-flex align-items-center">
-                                                <p class="m-0"><a href="javacsript:void();" data-toggle="modal" data-target="#createFriendModal"><i class="fas fa-plus"></i></a></p>
+                                                <p class="m-0"><a href="javascript:void();" data-toggle="modal" data-target="#createFriendModal"><i class="fas fa-plus"></i></a></p>
                                             </div>
                                             @endif
                                         </div>
@@ -259,14 +265,16 @@
                                                 @foreach($friends as $friend)
                                                 <li class="d-flex align-items-center">
                                                     <div class="user-img img-fluid">
-                                                        @if(isset($friend->userInfo->profile_image) && file_exists('images/profile/'. $friend->userInfo->profile_image))
-                                                        <img src="{{ url('images/profile/',$friend->userInfo->profile_image) }}" alt="story-img" class="rounded-circle avatar-40">
+                                                    <a href="{{ route('user-profile',encrypt($friend->id)) }}" class="">
+                                                        @if(isset($friend->profile_image) && file_exists('images/profile/'. $friend->profile_image))
+                                                        <img src="{{ url('images/profile/',$friend->profile_image) }}" alt="story-img" class="rounded-circle avatar-40">
                                                         @else
                                                         <img src="{{ url('assets/dashboard/img/default-avatar.png') }}" alt="profile-img" class="rounded-circle avatar-40" />
                                                         @endif
+                                                    </a>
                                                     </div>
                                                     <div class="media-support-info ml-3">
-                                                        <h6>{{ ucwords($friend->name) }}</h6>
+                                                        <h6><a href="{{ route('user-profile',encrypt($friend->id)) }}" class="">{{ ucwords($friend->name) }}</a></h6>
                                                     </div>
                                                 </li>
                                                 @endforeach
@@ -276,24 +284,65 @@
                                 </div>
                                 <div class="col-lg-8">
                                     <div id="post-modal-data" class="iq-card">
-                                        <div class="iq-card-header d-flex justify-content-between">
+                                    @if ($user->id == Auth::user()->id)<div class="iq-card-header d-flex justify-content-between">
                                             <div class="iq-header-title">
                                                 <h4 class="card-title">Create Post</h4>
                                             </div>
                                         </div>
-                                        <div class="iq-card-body" data-toggle="modal" data-target="#post-modal">
-                                            <div class="d-flex align-items-center">
+                                        <!------------------------------------------------------------------------------->
+
+                                        <form method="post" action="{{ route('newsfeed-create') }}" enctype="multipart/form-data" id="post_upload_Form"  >
+									@csrf
+									<div style="padding: 1em;">
+										<div class="d-flex align-items-center">
+											<div class="user-img">
+												@if(isset($userinfo->profile_image) && file_exists('images/profile/'. $userinfo->profile_image))
+												<img src="{{ url('images/profile',$userinfo->profile_image ) }}" alt="userimg" class="avatar-60 rounded-circle">
+												@else
+												<img src="{{url('assets/dashboard/img/default-avatar.png')}}" alt="userimg" class="avatar-60 rounded-circle">
+												@endif
+											</div>
+											<div class="caption ml-2">
+												<h5 class="mb-0 line-height">{{ ucwords(Auth::user()->name) }}</h5>
+											</div>
+										</div>
+										<input type="text" class="form-control mt-3" name="textpost" placeholder="What's on your mind?" style="border-radius:20px;">
+
+										<input type="hidden" name="group_id" value="{{ @$group_id }}">
+										<hr>
+										<ul class="d-flex flex-wrap align-items-center list-inline m-0 p-0">
+											<li class="col-md-6 mb-3 d-flex">
+												<div class="iq-bg-primary rounded p-2 pointer mr-3 image_upload1"><img src="{{ url('assets/dashboard/images/small/07.png') }}" alt="icon" class="img-fluid "> Photo/Video</div>
+												<input class="d-none" id="my_file1" type="file" name="image[]" multiple>
+												<div id="preview_embed"></div>
+											</li>
+										</ul>
+										<hr>
+										<div class="other-option">
+											<div class="d-flex align-items-center justify-content-between">
+
+
+											</div>
+										</div>
+										<button type="submit" class="btn btn-primary d-block w-100 mt-3">Post</button>
+									</div>
+								</form>
+@endif
+                                        <!--<div class="iq-card-body" data-toggle="modal" data-target="#post-modal">
+                                           <div class="d-flex align-items-center">
                                                 <div class="user-img">
-                                                    @if(isset(Auth::user()->userInfo->profile_image) && file_exists('images/profile/'. $friend->userInfo->profile_image))
+                                                    @if(isset(Auth::user()->profile_image) && file_exists('images/profile/'. $friend->profile_image))
                                                     <img src="{{ url('images/profile/',$friend->userInfo->profile_image) }}" alt="userimg" class="avatar-60 rounded-circle img-fluid">
                                                     @else
                                                     <img src="{{ url('assets/dashboard/img/default-avatar.png') }}" alt="profile-img" class="avatar-60 rounded-circle img-fluid" />
                                                     @endif
                                                 </div>
-                                                <form class="post-text ml-3 w-100" action="javascript:void();">
+                                                <!--<form class="post-text ml-3 w-100" action="javascript:void();">
                                                     <input type="text" class="form-control" placeholder="What's on your mind?" style="border: none;">
                                                 </form>
-                                            </div>
+
+
+                                            </div>-
                                             <hr>
                                             <ul class="post-opt-block d-flex align-items-center list-inline m-0 p-0">
                                                 <li class="iq-bg-primary rounded p-2 pointer mr-3"><a href="#"></a><img src="{{ url('assets/dashboard/images/small/07.png') }}" alt="icon" class="img-fluid"> Photo/Video</li>
@@ -316,7 +365,7 @@
                                                     </div>
                                                 </li>
                                             </ul>
-                                        </div>
+                                        </div>-->
                                         <div class="modal fade" id="post-modal" tabindex="-1" role="dialog" aria-labelledby="post-modalLabel" aria-hidden="true" style="display: none;">
                                             <div class="modal-dialog" role="document">
                                                 <div class="modal-content">
@@ -327,7 +376,7 @@
                                                     <div class="modal-body">
                                                         <div class="d-flex align-items-center">
                                                             <div class="user-img">
-                                                                @if(isset(Auth::user()->userInfo->profile_image) && file_exists('images/profile/'. $friend->userInfo->profile_image))
+                                                                @if(isset(Auth::user()->profile_image) && file_exists('images/profile/'. $friend->profile_image))
                                                                 <img src="{{ url('images/profile/',$friend->userInfo->profile_image) }}" alt="userimg" class="avatar-60 rounded-circle img-fluid">
                                                                 @else
                                                                 <img src="{{ url('assets/dashboard/img/default-avatar.png') }}" alt="profile-img" class="avatar-60 rounded-circle img-fluid" />
@@ -373,7 +422,7 @@
                                                             <div class="d-flex align-items-center justify-content-between">
                                                                 <div class="d-flex align-items-center">
                                                                     <div class="user-img mr-3">
-                                                                        @if(isset(Auth::user()->userInfo->profile_image) && file_exists('images/profile/'. $friend->userInfo->profile_image))
+                                                                        @if(isset(Auth::user()->profile_image) && file_exists('images/profile/'. $friend->userInfo->profile_image))
                                                                         <img src="{{ url('images/profile/',$friend->userInfo->profile_image) }}" alt="userimg" class="avatar-60 rounded-circle img-fluid">
                                                                         @else
                                                                         <img src="{{ url('assets/dashboard/img/default-avatar.png') }}" alt="profile-img" class="avatar-60 rounded-circle img-fluid" />
@@ -390,8 +439,16 @@
                                         </div>
                                     </div>
                                     <div class="iq-card">
+                                   
                                         <div class="iq-card-body">
+                                        <div id="newsfeedposts">
                                             @if($profilePosts->count() > 0)
+
+                                            @php
+                                            				$i = 1;
+                                            				$j = 1;
+                                            @endphp
+
                                             @foreach($profilePosts as $profilePost)
                                             <div class="post-item">
                                                 <div class="user-post-data p-3">
@@ -481,38 +538,66 @@
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <div class="like-block position-relative d-flex align-items-center">
                                                             <div class="d-flex align-items-center">
-                                                                <div class="like-data">
-                                                                    <div class="dropdown">
-                                                                        <span class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="button">
-                                                                            <img src="{{ url('assets/dashboard/images/icon/01.png') }}" class="img-fluid" alt="">
-                                                                        </span>
-                                                                        <div class="dropdown-menu">
-                                                                            <a class="ml-2 mr-2" href="#" data-toggle="tooltip" data-placement="top" title="" data-original-title="Like"><img src="{{ url('assets/dashboard/images/icon/01.png') }}" class="img-fluid" alt=""></a>
-                                                                            <a class="mr-2" href="#" data-toggle="tooltip" data-placement="top" title="" data-original-title="Love"><img src="{{ url('assets/dashboard/images/icon/02.png') }}" class="img-fluid" alt=""></a>
-                                                                            <a class="mr-2" href="#" data-toggle="tooltip" data-placement="top" title="" data-original-title="Happy"><img src="{{ url('assets/dashboard/images/icon/03.png') }}" class="img-fluid" alt=""></a>
-                                                                            <a class="mr-2" href="#" data-toggle="tooltip" data-placement="top" title="" data-original-title="HaHa"><img src="{{ url('assets/dashboard/images/icon/04.png') }}" class="img-fluid" alt=""></a>
-                                                                            <a class="mr-2" href="#" data-toggle="tooltip" data-placement="top" title="" data-original-title="Think"><img src="{{ url('assets/dashboard/images/icon/05.png') }}" class="img-fluid" alt=""></a>
-                                                                            <a class="mr-2" href="#" data-toggle="tooltip" data-placement="top" title="" data-original-title="Sade"><img src="{{ url('assets/dashboard/images/icon/06.png') }}" class="img-fluid" alt=""></a>
-                                                                            <a class="mr-2" href="#" data-toggle="tooltip" data-placement="top" title="" data-original-title="Lovely"><img src="{{ url('assets/dashboard/images/icon/07.png') }}" class="img-fluid" alt=""></a>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="total-like-block ml-2 mr-3">
-                                                                    <div class="dropdown">
-                                                                        <span class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="button">
-                                                                            {{ $profilePost->NewsfeedLike->count() }} Likes
-                                                                        </span>
-                                                                        <div class="dropdown-menu">
-                                                                            <a class="dropdown-item" href="#">Max Emum</a>
-                                                                            <a class="dropdown-item" href="#">Bill Yerds</a>
-                                                                            <a class="dropdown-item" href="#">Hap E. Birthday</a>
-                                                                            <a class="dropdown-item" href="#">Tara Misu</a>
-                                                                            <a class="dropdown-item" href="#">Midge Itz</a>
-                                                                            <a class="dropdown-item" href="#">Sal Vidge</a>
-                                                                            <a class="dropdown-item" href="#">Other</a>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
+
+<!--************ -->
+
+<div class="like-data">
+												<div class="dropdown">
+													<span class="dropdown-toggle">
+														<a href="javascript:void(0);" class="likePost" newsfeed_id="{{ $profilePost->id }}" route="{{ route('newsfeed-like')}}" user_id="{{ $profilePost->user_id }}" likes_id="{{ Auth::user()->id }}">
+															@if($profilePost->NewsfeedLike->count() > 0)
+															@php $hasMe = null; @endphp
+															@foreach($profilePost->NewsfeedLike as $newlike)
+															@if($newlike->NewsfeedUser->id !== Auth::user()->id)
+															@php $hasMe = null; @endphp
+															@continue;
+															@else
+															@php $hasMe = true; @endphp
+															@if($newlike->face_icon)
+															<input type="hidden" value="{{ $newlike->face_icon }}" class="facemocion" />
+															@else
+															<input type="hidden" value="gusta" class="facemocion" />
+															@endif
+															@endif
+															@endforeach
+															@if(!$hasMe)
+															<input type="hidden" value="gusta" class="facemocion" />
+															@endif
+															@else
+															<input type="hidden" value="gusta" class="facemocion" />
+															@endif
+														</a>
+
+													</span>
+												</div>
+											</div>
+
+                      <div class="total-like-block ml-2 mr-3">
+                        <div class="dropdown">
+                          <span class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="button">
+                            <span class="total_count_{{ $profilePost->id }}">{{ $profilePost->NewsfeedLike->count() }}</span> Likes
+                          </span>
+                          <input type="hidden" id="newsfeed_id_{{ $i }}" value="{{ $profilePost->id }}" disabled="">
+                          <input type="hidden" id="user_id_{{ $i }}" value="{{ $profilePost->user_id }}" disabled="">
+                          <input type="hidden" id="likes_id_{{ $i }}" value="{{ Auth::user()->id }}" disabled="">
+                          <div class="dropdown-menu" @if($profilePost->NewsfeedLike->count() == 0) style="background: #fff; border: 0 none;" @endif>
+                            @if($profilePost->NewsfeedLike->count() > 0)
+                            @php $like = 0; @endphp
+                            @foreach($profilePost->NewsfeedLike as $newlike)
+                            @if($like < 7) <a class="dropdown-item" href="#">{{ $newlike->NewsfeedUser->name }}</a>
+                              @endif
+                              @php $like = $like + 1; @endphp
+                              @endforeach
+                              @endif
+                          </div>
+                        </div>
+                      </div>
+<!--******************* -->
+
+
+
+
+
                                                             </div>
                                                             <div class="total-comment-block">
                                                                 <div class="dropdown">
@@ -527,13 +612,140 @@
                                                                 </div>
                                                             </div>
                                                         </div>
+                                                        <!--
                                                         <div class="share-block d-flex align-items-center feather-icon mr-3">
                                                             <a href="javascript:void();"><i class="ri-share-line"></i>
                                                                 <span class="ml-1">99 Share</span></a>
+                                                        </div>-->
+
+                                                        <div class="share-block d-flex align-items-center feather-icon mr-3 comment_btn" id="{{ $profilePost->id}}">
+                                                          <a href="javascript:void();" style="font-size: 18px;"><i class="ri-chat-2-line"></i>
+                                                            <span class="ml-1">Comment</span></a>
                                                         </div>
+
                                                     </div>
                                                     <hr>
-                                                    <ul class="post-comments p-0 m-0">
+
+<!------------------------------------------------------------------------------------------->
+<ul class="post-comments p-0 m-0 hide-newsfeed_{{ $profilePost->id }}">
+  @foreach($profilePost->NewsfeedComment as $key => $comment)
+  @if ($key == 1)
+  @break
+  @endif
+  <li class="mb-2 reply_comment_add_{{ $comment->id }}" id="comment-el-{{ $comment->id }}">
+    <div class="d-flex flex-wrap justify-content-start">
+      <div class="user-img">
+        @if(isset($comment->profileImage->profile_image) && file_exists('images/profile'. $comment->profileImage->profile_image))
+        <img src="{{ url('images/profile',$comment->profileImage->profile_image) }}" alt="userimg" class="avatar-35 rounded-circle img-fluid">
+        @else
+        <img src="{{url('assets/dashboard/img/default-avatar.png')}}" alt="userimg" class="avatar-35 rounded-circle img-fluid">
+        @endif
+      </div>
+      <div class="comment-data-block ml-3">
+        <h6>{{ ucwords($comment->NewsfeedUser->name) }}</h6>
+        <p class="mb-0 comment-text-{{ $comment->id }}">{{ ucwords($comment->comment) }}</p>
+        <div class="d-flex flex-wrap align-items-center comment-activity">
+            <!------------------------------------------------->
+            <div class="dropdown">
+													<span>&nbsp;
+														<a href="javascript:void();" class="likeCommentPost" comment_id="{{ $comment->id }}" newsfeed_id="{{ $profilePost->id }}" route="{{ route('newsfeed-comment-like')}}" users_id="{{ Auth::user()->id }}">
+															@if($comment->NewsfeedcommentLike->count() > 0)
+															@php $hasMe = null; @endphp
+															@foreach($comment->NewsfeedcommentLike as $newlike)
+															@if($newlike->user_id !== Auth::user()->id)
+															@php $hasMe = null; @endphp
+															@continue;
+															@else
+															@php $hasMe = true; @endphp
+															@if($newlike->face_icon)
+															<input type="hidden" value="{{ $newlike->face_icon }}" class="facemocion" />
+															@else
+															<input type="hidden" value="gusta" class="facemocion" />
+															@endif
+															@endif
+															@endforeach
+															@if(!$hasMe)
+															<input type="hidden" value="gusta" class="facemocion" />
+															@endif
+															@else
+															<input type="hidden" value="gusta" class="facemocion" />
+															@endif
+														</a>
+
+													</span>
+												</div>
+		<!------------------------------------------------->	
+          <a href="javascript:void();" class="likeCommentPost" comment_id="{{ $comment->id }}" newsfeed_id="{{ $profilePost->id }}" route="{{ route('newsfeed-comment-like')}}" users_id="{{ Auth::user()->id }}"><span id="" class="total_comment_like_count_{{ $comment->id }}">{{ $comment->NewsfeedcommentLike ? $comment->NewsfeedcommentLike->count() : "0"  }}</span> like</a>
+          <a href="javascript:void();" class="reply comment_reply_btn" id="{{ $comment->id}}">reply</a>
+          <a href="javascript:void();">translate</a>
+          <span> {{ newsfeeddateformate($comment->created_at) }}</span>
+        </div>
+        <!-- Reply Comment Form  -->
+
+        <form class="comment-text align-items-center mt-3 comment-reply-form comment_reply_add_{{$comment->id}}" route="{{ route('comment_reply_add')}}" user_id="{{ Auth::user()->id }}" newsfeed_id="{{ $profilePost->id }}" comment_id="{{$comment->id}}" id="">
+          <textarea class="form-control rounded comment-reply-text-{{ $comment->id }}" id="" name="comment" placeholder="" required></textarea>
+
+          <button class="badge badge-primary mt-2" id="submit" type="submit">Post</button>
+          <button class="badge badge-secondary mt-2 ml-2 comment_reply_btn" id="{{$comment->id}}">Cancel</button>
+
+        </form>
+        <!-- ... end Reply Comment Form  -->
+      </div>
+      @if ($comment->user_id === Auth::user()->id)
+      <div class="iq-card-post-toolbar d-inline-block">
+        <div class="dropdown">
+          <span class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="button">
+            <i class="ri-more-fill"></i>
+          </span>
+          <div class="dropdown-menu m-0 p-0">
+            <a class="dropdown-item p-3 edit-comment" href="javascript:void();" route="{{ route('edit-comment')}}" comment_id="{{ $comment->id }}" data-toggle="modal" data-target="#commentModal">
+              <div class="d-flex align-items-top">
+                <div class="icon font-size-20"><i class="ri-edit-2-line"></i></div>
+                <div class="data ml-2">
+                  <h6>Edit comment</h6>
+                </div>
+              </div>
+            </a>
+            <a class="dropdown-item p-3 delete-comment" href="javascript:void();" route="{{ route('delete-comment', $comment->id)}}" comment_id="{{ $comment->id }}" newsfeed_id="{{ $comment->newsfeed_id }}">
+              <div class="d-flex align-items-top">
+                <div class="icon font-size-20"><i class="ri-delete-back-2-line"></i></div>
+                <div class="data ml-2">
+                  <h6>Delete comment</h6>
+                </div>
+              </div>
+            </a>
+            <!-- <li>
+              <a href="javascript:void(0)" route="{{ route('edit-comment', $comment->id) }}" class="edit-comment" data-toggle="modal" data-target="#commentModal" comment_id="{{ $comment->id }}">Edit Comments</a>
+            </li>
+            <li>
+              <a href="javascript:void(0)" route="{{ route('delete-comment', $comment->id) }}" class="delete-comment" comment_id="{{ $comment->id }}" >Delete Comment</a>
+            </li> -->
+          </div>
+        </div>
+      </div>
+      @endif
+    </div>
+  </li>
+  @endforeach
+</ul>
+<form class="comment-text align-items-center mt-3 comment-form comment_add_{{$profilePost->id}}" route="{{ route('comment_add')}}" user_id="{{ Auth::user()->id }}" newsfeed_id="{{ $profilePost->id }}" id="">
+  <div class="comment-box comment-text-{{ $profilePost->id }}" id="" contentEditable="true" name="comment" onkeydown="doComment(event, {{ $profilePost->id }})"></div>
+  <!-- <button class="badge badge-primary mt-2" id="submit" type="submit">Post</button>
+  <button class="badge badge-secondary mt-2 ml-2 comment_btn" id="{{$profilePost->id}}">Cancel</button> -->
+</form>
+<?php
+if ($profilePost->NewsfeedComment->count() >= 2) {
+  $view_more = 'View ' . $profilePost->NewsfeedComment->count() - 1 . ' more comments +';
+} else {
+  $view_more = '';
+} ?>
+<a href="javascript:void(0)" newsfeed_id="{{$profilePost->id}}" route="{{ route('view-more-comments') }}" class="more-comments view-more-comment-btn-{{$profilePost->id}}">{{$view_more}}</a>
+
+
+
+<!---------------------------------------------------------------------------------------------->
+
+                                                  <!--  <ul class="post-comments p-0 m-0">
                                                         @foreach($profilePost->NewsfeedComment as $key => $comment)
                                                         @if ($key == 1)
                                                         @break
@@ -574,12 +786,16 @@
                                                             <a href="javascript:void();"><i class="ri-user-smile-line mr-3"></i></a>
                                                             <a href="javascript:void();"><i class="ri-camera-line mr-3"></i></a>
                                                         </div>
-                                                    </form>
+                                                    </form>-->
                                                 </div>
                                             </div>
+                                            @php
+                                    				$i++;
+                                    				$j++;
+                                    				@endphp
                                             @endforeach
                                             @endif
-                                        </div>
+                                            </div> </div>
                                     </div>
                                 </div>
                             </div>
@@ -759,13 +975,23 @@
                         <div class="iq-card">
                             <div class="iq-card-body">
                                 <h2>Photos</h2>
+                                @php
+                                if ($user->id !== Auth::id())  {
+                                    $photosof  = "Photos of ".ucwords($user->name);
+                                    $userPhotos = ucwords($user->name). " Photos";
+                                }
+                                else {
+                                    $photosof  = "Photos of you";
+                                    $userPhotos = "Your Photos";
+                                }
+                                @endphp
                                 <div class="friend-list-tab mt-2">
                                     <ul class="nav nav-pills d-flex align-items-center justify-content-left friend-list-items p-0 mb-2">
                                         <li>
-                                            <a class="nav-link active" data-toggle="pill" href="#photosofyou">Photos of You</a>
+                                            <a class="nav-link active" data-toggle="pill" href="#photosofyou">{{$photosof}}</a>
                                         </li>
                                         <li>
-                                            <a class="nav-link" data-toggle="pill" href="#your-photos">Your Photos</a>
+                                            <a class="nav-link" data-toggle="pill" href="#your-photos">{{$userPhotos}}</a>
                                         </li>
                                     </ul>
                                     <div class="tab-content">
@@ -1033,9 +1259,9 @@
             <!-- Modal body -->
             <div class="modal-body">
                 <div id="resizer"></div>
-                <button class="btn rotate float-lef" data-deg="90" > 
+                <button class="btn rotate float-lef" data-deg="90" >
                 <i class="fas fa-undo"></i></button>
-                <button class="btn rotate float-right" data-deg="-90" > 
+                <button class="btn rotate float-right" data-deg="-90" >
                 <i class="fas fa-redo"></i></button>
                 <hr>
                 <button class="btn btn-block btn-dark" id="upload" route="{{ route('profile-image-upload-save')}}">Save</button>
@@ -1049,6 +1275,245 @@
 
 @section('page-js')
 <script type="text/javascript">
+
+function blockFriend($this)
+{
+    toastr.options = {
+        "closeButton": true,
+        "newestOnTop": true,
+        "positionClass": "toast-top-right"
+    };
+    route = $($this).attr('route');
+    $.ajax({
+        url: route,
+        method: "GET",
+        data: {
+            "_token": "{{ csrf_token() }}",
+        },
+        beforeSend: function() {},
+        success: function(data) {
+            toastr.success(data.text);
+            if (data.status) {
+                // location.reload();
+            }
+        }
+    })
+}
+
+function unblockFriend($this) {
+    toastr.options = {
+        "closeButton": true,
+        "newestOnTop": true,
+        "positionClass": "toast-top-right"
+    };
+    route = $($this).attr('route');
+    $.ajax({
+        url: route,
+        method: "GET",
+        data: {
+            "_token": "{{ csrf_token() }}",
+        },
+        beforeSend: function() {},
+        success: function(data) {
+            toastr.success(data.text);
+            if (data.status) {
+                // location.reload();
+            }
+        }
+    })
+}
+
+function createFriendRequest() {
+    toastr.options = {
+        "closeButton": true,
+        "newestOnTop": true,
+        "positionClass": "toast-top-right"
+    };
+    let user_id = $("#friend_list").val();
+    let route = `/add-friend/${user_id}`;
+    $.ajax({
+        url: route,
+        method: "GET",
+        success: function(data) {
+            if (data.status === "success") {
+                toastr.success(data.text);
+            }
+        },
+        error: function(response) {
+            toastr.error(response.responseJSON.message);
+        }
+    })
+}
+
+function acceptFriendRequest($this) {
+    toastr.options = {
+        "closeButton": true,
+        "newestOnTop": true,
+        "positionClass": "toast-top-right"
+    };
+    route = $($this).attr('route');
+    $.ajax({
+        url: route,
+        method: "GET",
+        data: {
+            "_token": "{{ csrf_token() }}",
+        },
+        beforeSend: function() {},
+        success: function(data) {
+            toastr.success(data.text);
+            if (data.status) {
+                // location.reload();
+            }
+        }
+    })
+}
+
+function likePost($this) {
+            newsfeed_id = $($this).attr('newsfeed_id');
+			user_id = $($this).attr('user_id');
+			likes_id = $($this).attr('likes_id');
+			route = $($this).attr('route');
+			face_icon = $($this).find('input').val();
+
+			$.ajax({
+				url: route,
+				method: "GET",
+				data: {
+					"_token": "{{ csrf_token() }}",
+					"newsfeed_id": newsfeed_id,
+					"user_id": user_id,
+					"likes_id": likes_id,
+					"face_icon": face_icon,
+				},
+				beforeSend: function() {},
+				success: function(data) {
+					console.log('data', data);
+					if (null !== (data['newsfeedLike'])) {
+						$('.likePost').find('input').val(data['newsfeedLike']['face_icon']);
+				    }
+					if (data['is_like'] === true) {
+						html = `<i class="ri-thumb-down-line mr-2"></i>Unlike Page`;
+						$('.like1Color_' + newsfeed_id).html(html);
+						$('.like1Color_' + newsfeed_id).css("color", "#ff5e3a");
+						//$('.like2Color_' + newsfeed_id).css("background-color", "#ff5e3a");
+					} else {
+						html = `<i class="ri-thumb-up-line mr-2"></i>Like Page`;
+						$('.like1Color_' + newsfeed_id).html(html);
+						$('.like1Color_' + newsfeed_id).css("color", "#212529");
+						//$('.like2Color_' + newsfeed_id).css("background-color", "#9a9fbf");
+					}
+					$('.total_count_' + newsfeed_id).html(data['count']);
+				}
+			})
+        }
+
+function moreComments($this)
+{
+    newsfeed_id = $($this).attr('newsfeed_id');
+    route = $($this).attr('route');
+    $.ajax({
+        url: route,
+        method: "GET",
+        data: {
+            "_token": "{{ csrf_token() }}",
+            "newsfeed_id": newsfeed_id,
+        },
+        beforeSend: function() {
+            $('.view-more-comment-btn-' + newsfeed_id).html('Loading...');
+        },
+        success: function(data) {
+            if (data.length > 0) {
+                _html = data;
+                $('.view-more-comment-btn-' + newsfeed_id).hide();
+                $(".comments_list_" + newsfeed_id).hide();
+                $(".hide-newsfeed_" + newsfeed_id).html(data);
+                // $('.comment-form').hide();
+                // $('.comment-reply-form').hide();
+                // $('.comment-reply-child-form').hide();
+                $(".comment_reply_btn").click(function() {
+                    var id = $(this).attr('id');
+                    $(".cr_" + id).toggle();
+                });
+                $(".comment_reply_child_btn").click(function() {
+                    var id = $(this).attr('id');
+                    $(".crc_" + id).toggle();
+                });
+                    
+                $('.comment-reply-form').on('submit', function(e) {
+                    console.log(4444444444444444444);
+                    e.preventDefault();
+                    CommentReplyForm(this);
+                });
+                $('.comment-reply-child-form').on('submit', function(e) {
+                    e.preventDefault();
+                    CommentReplyChildForm(this);
+                });
+                    $('.facemocion').faceMocion({
+    emociones: [{
+            "emocion": "amo",
+            "TextoEmocion": "I love"
+        },
+        {
+            "emocion": "divierte",
+            "TextoEmocion": "I enjoy"
+        },
+        {
+            "emocion": "gusta",
+            "TextoEmocion": "I like"
+        },
+        {
+            "emocion": "asombro",
+            "TextoEmocion": "It amazes me"
+        },
+        {
+            "emocion": "alegre",
+            "TextoEmocion": "I am glad"
+        }
+    ]
+});
+
+
+
+
+            } else {
+                $('.view-more-comment-btn-' + newsfeed_id).html('No Comment Found.');
+            }
+        }
+    })
+}
+
+function unFriend($this) {
+        toastr.options = {
+            "closeButton": true,
+            "newestOnTop": true,
+            "positionClass": "toast-top-right"
+        };
+        route = $($this).attr('route');
+        $.ajax({
+            url: route,
+            method: "GET",
+            data: {
+                "_token": "{{ csrf_token() }}",
+            },
+            beforeSend: function() {},
+            success: function(data) {
+                toastr.success(data.text);
+                if (data.status) {
+                    // location.reload();
+                }
+            }
+        })
+}
+
+function sharePost() {
+    let newsfeed_id = $('.share-post-btn').attr('newsfeed-id');
+    let username = $('.share-post-btn').attr('username');
+    let subject = `${encodeURIComponent('See this post by @' + username)}`;
+    let body = subject + `${encodeURIComponent('{{url()->current()}}')}`;
+    let mailtoURL = 'mailto:?subject=' + subject + '&body=' + body;
+    $('.share-post-btn').attr('href', mailtoURL);
+}
+
     $(document).ready(function() {
         var croppie = null;
         var el = document.getElementById('resizer');
@@ -1058,29 +1523,29 @@
             var pos = str.indexOf(';base64,');
             var type = str.substring(5, pos);
             var b64 = str.substr(pos + 8);
-        
+
             // decode base64
             var imageContent = atob(b64);
-        
+
             // create an ArrayBuffer and a view (as unsigned 8-bit)
             var buffer = new ArrayBuffer(imageContent.length);
             var view = new Uint8Array(buffer);
-        
+
             // fill the view, using the decoded base64
             for (var n = 0; n < imageContent.length; n++) {
                 view[n] = imageContent.charCodeAt(n);
             }
-        
+
             // convert ArrayBuffer to Blob
             var blob = new Blob([buffer], { type: type });
-        
+
             return blob;
         }
 
         $.getImage = function(input, croppie) {
             if (input.files && input.files[0]) {
                 var reader = new FileReader();
-                reader.onload = function(e) {  
+                reader.onload = function(e) {
                     croppie.bind({
                         url: e.target.result,
                     });
@@ -1088,6 +1553,11 @@
                 reader.readAsDataURL(input.files[0]);
             }
         }
+
+        $(".image_upload1").click(function() {
+			$("input[id='my_file1']").click();
+		});
+
         $("#file-upload").on("change", function(event) {
             $("#cropImageModal").modal();
             // Initailize croppie instance and assign it to global variable
@@ -1103,12 +1573,12 @@
                     },
                     enableOrientation: true
                 });
-            $.getImage(event.target, croppie); 
+            $.getImage(event.target, croppie);
         });
 
         $("#upload").on("click", function() {
             croppie.result('base64').then(function(base64) {
-                $("#cropImageModal").modal("hide"); 
+                $("#cropImageModal").modal("hide");
                 $(".profile-img img").attr("src","assets/dashboard/images/page-img/page-load-loader.gif");
 
                 var route = $("#upload").attr('route');
@@ -1126,15 +1596,15 @@
                     beforeSend: function() {},
                     success: function(data) {
                         if (data == "uploaded") {
-                            $(".profile-img img").attr("src", base64); 
+                            $(".profile-img img").attr("src", base64);
                         } else {
-                            $(".profile-img img").attr("src","assets/dashboard/img/default-avatar.png"); 
+                            $(".profile-img img").attr("src","assets/dashboard/img/default-avatar.png");
                             console.log(data['profile_image']);
                         }
                     },
                     error: function(error) {
                         console.log(error);
-                        $(".profile-img img").attr("src","assets/dashboard/img/default-avatar.png"); 
+                        $(".profile-img img").attr("src","assets/dashboard/img/default-avatar.png");
                     }
                 });
             });
@@ -1142,7 +1612,7 @@
 
         // To Rotate Image Left or Right
         $(".rotate").on("click", function() {
-            croppie.rotate(parseInt($(this).data('deg'))); 
+            croppie.rotate(parseInt($(this).data('deg')));
         });
 
         $('#cropImageModal').on('hidden.bs.modal', function (e) {
@@ -1153,104 +1623,129 @@
 
     });
 
+    
+
     $(document).on('click', '.block-friend', function() {
-        toastr.options = {
-            "closeButton": true,
-            "newestOnTop": true,
-            "positionClass": "toast-top-right"
-        };
-        route = $(this).attr('route');
-        $.ajax({
-            url: route,
-            method: "GET",
-            data: {
-                "_token": "{{ csrf_token() }}",
-            },
-            beforeSend: function() {},
-            success: function(data) {
-                toastr.success(data.text);
-                if (data.status) {
-                    // location.reload();
-                }
-            }
-        })
+        blockFriend(this);
     });
 
     $(document).on('click', '.unblock-friend', function() {
-        toastr.options = {
-            "closeButton": true,
-            "newestOnTop": true,
-            "positionClass": "toast-top-right"
-        };
-        route = $(this).attr('route');
-        $.ajax({
-            url: route,
-            method: "GET",
-            data: {
-                "_token": "{{ csrf_token() }}",
-            },
-            beforeSend: function() {},
-            success: function(data) {
-                toastr.success(data.text);
-                if (data.status) {
-                    // location.reload();
-                }
-            }
-        })
+        unblockFriend(this);
     });
 
     $("#createFriendRequest").on('click', function() {
-        toastr.options = {
-            "closeButton": true,
-            "newestOnTop": true,
-            "positionClass": "toast-top-right"
-        };
-        let user_id = $("#friend_list").val();
-        let route = `/add-friend/${user_id}`;
-        $.ajax({
-            url: route,
-            method: "GET",
-            success: function(data) {
-                if (data.status === "success") {
-                    toastr.success(data.text);
-                }
-            },
-            error: function(response) {
-                toastr.error(response.responseJSON.message);
-            }
-        })
+        createFriendRequest();
     });
 
     $(document).on('click', '.accept-friend-request', function() {
-        toastr.options = {
-            "closeButton": true,
-            "newestOnTop": true,
-            "positionClass": "toast-top-right"
-        };
-        route = $(this).attr('route');
-        $.ajax({
-            url: route,
-            method: "GET",
-            data: {
-                "_token": "{{ csrf_token() }}",
-            },
-            beforeSend: function() {},
-            success: function(data) {
-                toastr.success(data.text);
-                if (data.status) {
-                    // location.reload();
-                }
-            }
-        })
+        acceptFriendRequest(this);
     });
 
     $(document).on('click', '.un-friend', function() {
+        unFriend(this);
+    });
+
+    function postFollow($this)
+    {
+        newsfeed_id = $($this).attr('newsfeed_id');
+        user_id = $($this).attr('user_id');
+        following_id = $($this).attr('following_id');
+        route = $($this).attr('route');
+
+        $.ajax({
+            url: route,
+            method: "POST",
+            data: {
+                "_token": "{{ csrf_token() }}",
+                "newsfeed_id": newsfeed_id,
+                "user_id": user_id,
+                "following_id": following_id,
+            },
+            beforeSend: function() {},
+            success: function(response) {
+                if (response.data.is_follow === true) {
+                    $('#post-follow-' + newsfeed_id).html('');
+                    html = '<i class="ri-user-unfollow-line line-height-17"></i>Unfollow';
+                    $('#post-follow-' + newsfeed_id).html(html);
+                    $('#post-follow-' + newsfeed_id).css('color', 'black');
+                    $('#post-follow-' + newsfeed_id).css('font-weight', 'bold');
+                } else {
+                    $('#post-follow-' + newsfeed_id).html('');
+                    html = '<i class="ri-user-follow-line line-height-17"></i>Follow';
+                    $('#post-follow-' + newsfeed_id).html(html);
+                    $('#post-follow-' + newsfeed_id).css('color', '#50b5ff');
+                    $('#post-follow-' + newsfeed_id).css('font-weight', 'normal');
+                }
+                //$('.total_count_' + newsfeed_id).html(data['count']);
+            }
+        })
+    }
+
+    function likeCommentPost($this) {
+			newsfeed_id = $($this).attr('newsfeed_id');
+			users_id = $($this).attr('users_id');
+			comment_id = $($this).attr('comment_id');
+			route = $($this).attr('route');
+            face_icon = $($this).find('input').val();
+
+			$.ajax({
+				url: route,
+				method: "GET",
+				data: {
+					"_token": "{{ csrf_token() }}",
+					"newsfeed_id": newsfeed_id,
+					"comment_id": comment_id,
+					"users_id": users_id,
+                    "face_icon": face_icon,
+				},
+				beforeSend: function() {},
+				success: function(data) {
+					if (data['is_like'] === true) {
+						$('.commentlikeColor_' + comment_id).css("background-color", "#ff5e3a");
+					} else {
+						$('.commentlikeColor_' + comment_id).css("background-color", "#fafbfd");
+					}
+					$('.total_comment_like_count_' + comment_id).html(data['count']);
+				}
+			})
+        }
+
+    function likeReplyCommentPost($this) {
+        newsfeed_id = $($this).attr('newsfeed_id');
+        users_id = $($this).attr('users_id');
+        comment_id = $($this).attr('comment_id');
+        reply_comment_id = $($this).attr('reply_comment_id');
+        route = $($this).attr('route');
+        $.ajax({
+            url: route,
+            method: "GET",
+            data: {
+                "_token": "{{ csrf_token() }}",
+                "newsfeed_id": newsfeed_id,
+                "comment_id": comment_id,
+                "users_id": users_id,
+                "reply_comment_id": reply_comment_id
+            },
+            beforeSend: function() {},
+            success: function(data) {
+                if (data['is_like'] === true) {
+                    $('.replycommentlikeColor_' + reply_comment_id).css("background-color", "#ff5e3a");
+                } else {
+                    $('.replycommentlikeColor_' + reply_comment_id).css("background-color", "#fafbfd");
+                }
+                $('.total_reply_comment_like_count_' + reply_comment_id).html(data['count']);
+            }
+        })
+    }
+
+    function blocknewsfeed($this) {
         toastr.options = {
             "closeButton": true,
             "newestOnTop": true,
             "positionClass": "toast-top-right"
         };
-        route = $(this).attr('route');
+        newsfeed_id = $($this).attr('newsfeed_id');
+        var route = "{{url('/block-newsfeed/')}}" + '/' + newsfeed_id;
         $.ajax({
             url: route,
             method: "GET",
@@ -1261,11 +1756,440 @@
             success: function(data) {
                 toastr.success(data.text);
                 if (data.status) {
-                    // location.reload();
+                    $('.block-hide-show-' + newsfeed_id).hide();
+                    var _html = '<a href="javascript:void(0)" class="unblock-newsfeed unblock-hide-show-' + newsfeed_id + '" newsfeed_id="' + newsfeed_id + '" id="liveToastBtn">Unblock Post</a>'
+                    $(".block-unbolock-" + newsfeed_id).append(_html);
                 }
             }
         })
+    }
+
+    function unblockNewsfeed($this) {
+        toastr.options = {
+            "closeButton": true,
+            "newestOnTop": true,
+            "positionClass": "toast-top-right"
+        };
+
+        newsfeed_id = $($this).attr('newsfeed_id');
+        var route = "{{url('/unblock-newsfeed/')}}" + '/' + newsfeed_id;
+
+        $.ajax({
+            url: route,
+            method: "GET",
+            data: {
+                "_token": "{{ csrf_token() }}",
+            },
+            beforeSend: function() {},
+            success: function(data) {
+                toastr.success(data.text);
+                if (data.status) {
+                    $('.unblock-hide-show-' + newsfeed_id).hide();
+                    var _html = '<a href="javascript:void(0)" class="block-newsfeed block-hide-show-' + newsfeed_id + '" newsfeed_id="' + newsfeed_id + '" id="liveToastBtn">Block Post</a>'
+                    $(".block-unbolock-" + newsfeed_id).append(_html);
+                }
+            }
+        }) 
+    }
+
+    function addFriend($this) {
+        toastr.options = {
+            "closeButton": true,
+            "newestOnTop": true,
+            "positionClass": "toast-top-right"
+        };
+
+        route = $($this).attr('route');
+        user_id = $($this).attr('user_id');
+        $.ajax({
+            url: route,
+            method: "GET",
+            data: {
+                "_token": "{{ csrf_token() }}",
+                "user_id": user_id,
+            },
+            beforeSend: function() {},
+            success: function(data) {
+                toastr.success(data.text.message);
+                if (data.status) {
+                    $('.add-friend-' + user_id).remove();
+                }
+            }
+        })
+    }
+
+    function deleteComment($this) {
+        comment_id = $($this).attr('comment_id');
+        toastr.options = {
+            "closeButton": true,
+            "newestOnTop": true,
+            "positionClass": "toast-top-right"
+        };
+        route = $($this).attr('route');
+        if (confirm("Are you Sure to delete this comment ?") == true) {
+            $.ajax({
+                url: route,
+                method: "GET",
+                data: {
+                    "_token": "{{ csrf_token() }}",
+                },
+                beforeSend: function() {},
+                success: function(data) {
+                    toastr.success(data.text);
+                    if (data.status) {
+                        $('#comment-el-' + comment_id).remove();
+                        $('.reply_comment_add_' + comment_id).remove();
+                    }
+                }
+            })
+        }
+    }
+
+    function deleteNewsfeed($this) {
+        newsfeed_id = $($this).attr('newsfeed_id');
+        toastr.options = {
+            "closeButton": true,
+            "newestOnTop": true,
+            "positionClass": "toast-top-right"
+        };
+        route = $($this).attr('route');
+        if (confirm("Are You Sure to delete this newsfeed post ?") == true) {
+            $.ajax({
+                url: route,
+                method: "GET",
+                data: {
+                    "_token": "{{ csrf_token() }}",
+                },
+                beforeSend: function() {},
+                success: function(data) {
+                    toastr.success(data.text);
+                    if (data.status) {
+                        document.getElementById("del-newsfeed_" + newsfeed_id).remove();
+                    }
+                }
+            })
+        }
+    }
+
+    // Post Comment
+	function doComment(event, newsfeed_id) {
+		if (event.keyCode == 13) {
+			let comment = $('.comment-text-' + newsfeed_id).text();
+			if (!event.shiftKey && comment) {
+				$('.comment_add_' + newsfeed_id).submit();
+				event.stopPropagation();
+			}
+		}
+
+	}
+
+    function editNewsFeed($this) 
+    {
+        newsfeed_id = $($this).attr('newsfeed_id');
+        route = $($this).attr('route');
+
+        $.ajax({
+            url: route,
+            method: "GET",
+            data: {
+                "_token": "{{ csrf_token() }}",
+                "newsfeed_id": newsfeed_id,
+            },
+            beforeSend: function() {},
+            success: function(data) {
+                $('#newsfeedModal').modal('show');
+                $('#newsfeed_description').val('');
+                $('#newsfeed_description').val(data.data.newfeed.text);
+                document.getElementById("newsfeed-id").value = data.data.newfeed.id;
+                var images = data.data.newfeed_galary;
+                var arrayImagesElement = document.getElementById("edit-img-show");
+
+                function createImageNode(images) {
+                    var img = document.createElement('img');
+                    img.src = "images/newsfeed/" + images.image;
+                    img.id = "edit-image-show";
+                    img.class = "edit-image-show";
+                    img.width = "435";
+                    img.height = "194"
+                    img.style.margin = "15px";
+                    return img;
+                }
+                $('div#edit-img-show  img').remove();
+                images.forEach(img => {
+                    arrayImagesElement.appendChild(createImageNode(img));
+                });
+
+            }
+        })
+    }
+
+    function editReplyComment($this) {
+		comment_id = $($this).attr('comment_id');
+		reply_comment_id = $($this).attr('reply_comment_id');
+		route = $($this).attr('route');
+
+		$.ajax({
+			url: route,
+			method: "GET",
+			data: {
+				"_token": "{{ csrf_token() }}",
+				"comment_id": comment_id,
+				"reply_comment_id": reply_comment_id
+			},
+			beforeSend: function() {},
+			success: function(data) {
+				$('#replyCommentModal').modal('show');
+				$('#reply_comment_description').val('');
+				$('#reply_comment_description').val(data.reply_comment);
+				document.getElementById("edit-comments-id").value = data.comment_id;
+				document.getElementById("edit-reply-comment-id").value = data.id;
+			}
+		})
+    }
+
+    function editComment($this) {
+		comment_id = $($this).attr('comment_id');
+		route = $($this).attr('route');
+
+		$.ajax({
+			url: route,
+			method: "GET",
+			data: {
+				"_token": "{{ csrf_token() }}",
+				"comment_id": comment_id,
+			},
+			beforeSend: function() {},
+			success: function(data) {
+				//$('#commentModal').modal('show');
+				$('#comment_desc').val('');
+				$('#comment_desc').val(data.comment);
+				$('#edit-comment-id').val(data.id);
+			}
+		})
+    }
+
+    function commentForm($this) {
+        let user_id = $($this).attr('user_id')
+        let newsfeed_id = $($this).attr('newsfeed_id')
+        let comment = $(".comment-text-" + newsfeed_id).text();
+        route = $($this).attr('route');
+        $.ajax({
+            url: route,
+            method: "POST",
+            data: {
+                "_token": "{{ csrf_token() }}",
+                comment: comment,
+                user_id: user_id,
+                newsfeed_id: newsfeed_id,
+            },
+            success: function(response) {
+                location.reload();
+            },
+            error: function(response) {
+                $('.comment-error-' + newsfeed_id).text(response.responseJSON.errors.comment);
+            }
+        });
+    }
+
+    function deleteReplyComment($this) {
+            comment_id = $($this).attr('comment_id');
+            reply_comment_id = $($this).attr('reply_comment_id');
+            toastr.options = {
+                "closeButton": true,
+                "newestOnTop": true,
+                "positionClass": "toast-top-right"
+            };
+            route = $($this).attr('route');
+            if (confirm("Are You Sure to delete this comment reply ?") == true) {
+                $.ajax({
+                    url: route,
+                    method: "GET",
+                    data: {
+                        "_token": "{{ csrf_token() }}",
+                    },
+                    beforeSend: function() {},
+                    success: function(data) {
+                        toastr.success(data.text);
+                        if (data.status) {
+                            document.getElementById("del-reply-comment_" + reply_comment_id).remove();
+                        }
+                    }
+                })
+            }
+        }
+
+    function NewsfeedForm() 
+    {
+        var formData = new FormData();
+        let newsfeed_description = $('#newsfeed_description').val();
+        let my_file2 = $('#my_file2').prop('files');
+        let newsfeed_id = $('#newsfeed-id').val();
+        let TotalFiles = $('#my_file2')[0].files.length; //Total files
+        let files = $('#my_file2')[0];
+
+        for (let i = 0; i < TotalFiles; i++) {
+            formData.append('image' + i, files.files[i]);
+        }
+
+        let _token = $('meta[name="csrf-token"]').attr('content');
+        _token = document.getElementsByName("_token")[0].value
+        formData.append('_token', _token);
+        formData.append('textpost', newsfeed_description);
+        formData.append('totalFile', TotalFiles);
+        formData.append('newsfeed_id', newsfeed_id);
+
+        $.ajax({
+            url: "{{ url('/newsfeed/update')}}",
+            type: "POST",
+            contentType: 'multipart/form-data',
+            cache: false,
+            contentType: false,
+            processData: false,
+            data: formData,
+            beforeSend: function() {
+
+            },
+            success: (response) => {
+                toastr.success(response.text);
+                $("#newsfeedModal").modal('hide');
+
+                $('.newsfeed-text-' + newsfeed_id).text(newsfeed_description);
+                $('.newsfeed-update-img-' + newsfeed_id).hide();
+                let _html = ''
+                response.data.forEach(function(element) {
+                    let imagePath = "{{ url('images/newsfeed/') }}";
+                    _html += '<img loading="lazy" src="' + imagePath + '/' + element.image + '" alt="photo" width="488" height="194" ><br>'
+                });
+                $('div.newsfeed-update-img-show-' + newsfeed_id + ' > img, br').remove();
+                $(".newsfeed-update-img-show-" + newsfeed_id).append(_html);
+            },
+            error: function(data) {
+                console.log(data);
+            }
+        });
+    }
+
+    function filePreview(input) {
+		if (input.files && input.files[0]) {
+			var reader = new FileReader();
+			reader.onload = function(e) {
+				$('#post_upload_Form + embed').remove();
+				 $('#post_upload_Form #preview_embed').html('<embed src="' + e.target.result + '" width="80" height="50">');
+			};
+			reader.readAsDataURL(input.files[0]);
+		}
+	}
+
+    function CommentForm_2() 
+        {
+            var formData = new FormData();
+            let comment_desc = $('#comment_desc').val();
+            let comment_id = $('#edit-comment-id').val();
+            let _token = $('meta[name="csrf-token"]').attr('content');
+            _token = document.getElementsByName("_token")[0].value
+            formData.append('_token', _token);
+            formData.append('textpost', comment_desc);
+            formData.append('comment_id', comment_id);
+            $.ajax({
+                url: "{{ url('/comment-update')}}",
+                type: "POST",
+                contentType: 'multipart/form-data',
+                cache: false,
+                contentType: false,
+                processData: false,
+                data: formData,
+                beforeSend: function() {
+
+                },
+                success: (response) => {
+                    toastr.success(response.text);
+                    if (response.status === "success") {
+                        $("#commentModal").modal('hide');
+                        $('.comment-text-' + comment_id).text(comment_desc);
+                    }
+                },
+                error: function(data) {
+                    console.log(data);
+                }
+            });
+        }
+
+
+    function CommentReplyForm_2()
+    {
+        var formData = new FormData();
+        let reply_comment_description = $('#reply_comment_description').val();
+        let comment_id = $('#edit-comments-id').val();
+        let reply_comment_id = $('#edit-reply-comment-id').val();
+        let _token = $('meta[name="csrf-token"]').attr('content');
+        _token = document.getElementsByName("_token")[0].value
+        formData.append('_token', _token);
+        formData.append('textpost', reply_comment_description);
+        formData.append('comment_id', comment_id);
+        formData.append('reply_comment_id', reply_comment_id);
+
+        $.ajax({
+            url: "{{ url('/reply-comment-update')}}",
+            type: "POST",
+            contentType: 'multipart/form-data',
+            cache: false,
+            contentType: false,
+            processData: false,
+            data: formData,
+            beforeSend: function() {
+
+            },
+            success: (response) => {
+                toastr.success(response.text);
+                if (response.status === "success") {
+                    $("#replyCommentModal").modal('hide');
+                    $('.comment-reply-txt-' + reply_comment_id).text(reply_comment_description);
+                }
+            },
+            error: function(data) {
+                console.log(data);
+            }
     });
+    }
+
+    function CommentReplyForm($this) {
+        let user_id = $($this).attr('user_id')
+        let newsfeed_id = $($this).attr('newsfeed_id')
+        let comment_id = $($this).attr('comment_id')
+        let comment = $(".comment-reply-text-" + comment_id).val();
+
+        route = $($this).attr('route');
+        if (comment === "") {
+            $('.comment-reply-error-' + comment_id).text("This field is required.");
+        } else {
+            $.ajax({
+                url: route,
+                method: "POST",
+                data: {
+                    "_token": "{{ csrf_token() }}",
+                    comment: comment,
+                    user_id: user_id,
+                    newsfeed_id: newsfeed_id,
+                    comment_id: comment_id
+                },
+                success: function(response) {
+                    console.log(response.data);
+                    $('.comment_reply_add_' + comment_id).hide();
+                    $(".reply_comment_add_" + comment_id).html(response.data);
+                    $('.comment-reply-child-form').hide();
+                    $('.comment-reply-text-' + comment_id).val('');
+                    $(".comment_reply_child_btn").click(function() {
+                        var id = $(this).attr('id');
+                        $(".crc_" + response.insertData.id).toggle();
+                    });
+                },
+                error: function(response) {
+                    alert('errrorrrrrrrr');
+                    $('.comment-reply-error-' + comment_id).text(response.responseJSON.errors.comment);
+                }
+            });
+        }
+    }
 
     $(document).ready(function() {
         // event modal
@@ -1427,5 +2351,455 @@
             }
         });
     });
+/*
+    $('.facemocion').faceMocion({
+      emociones: [{
+          "emocion": "amo",
+          "TextoEmocion": "I love"
+        },
+        {
+          "emocion": "divierte",
+          "TextoEmocion": "I enjoy"
+        },
+        {
+          "emocion": "gusta",
+          "TextoEmocion": "I like"
+        },
+        {
+          "emocion": "asombro",
+          "TextoEmocion": "It amazes me"
+        },
+        {
+          "emocion": "alegre",
+          "TextoEmocion": "I am glad"
+        }
+      ]
+    });
+
+
+		$(document).on('click', '.likePost', function() {
+            likePost(this);
+            
+		});
+
+        $('#my_file1').change(function() {
+		filePreview(this);
+	});
+
+	
+
+ 
+ 
+ 
+ $('.share-post-btn').on('click', function() { sharePost(); });
+
+
+    $(document).ready(function() {
+		$(".image_upload1").click(function() {
+			$("input[id='my_file1']").click();
+		});
+
+		$(".image_upload2").click(function() {
+			$("input[id='my_file2']").click();
+		});
+
+		$(".image_upload3").click(function() {
+			$("input[id='my_file3']").click();
+		});
+
+		$('.comment-form').hide();
+		$(".comment_btn").click(function() {
+			var id = $(this).attr('id');
+			$(".comment_add_" + id).toggle();
+		});
+
+		$('.comment-reply-form').hide();
+		$(".comment_reply_btn").click(function() {
+			var id = $(this).attr('id');
+			$(".comment_reply_add_" + id).toggle();
+		});
+
+		$('.comment-reply-child-form').hide();
+		$(".comment_reply_child_btn").click(function() {
+			var id = $(this).attr('id');
+			$(".comment_reply_child_add_" + id).toggle();
+		});
+
+		 
+		$('.postFollow').on('click', function() {
+            postFollow(this);
+        });
+
+		$(document).on('click', '.likeCommentPost', function() {
+            likeCommentPost(this);
+           
+		});
+		$(document).on('click', '.likeReplyCommentPost', function() {
+            likeReplyCommentPost(this);
+        });
+
+
+    // Block Newsfeed Post
+	$(document).on('click', '.block-newsfeed', function() {
+        blocknewsfeed(this);
+        
+	});
+
+    // Block Newsfeed Post
+	$(document).on('click', '.unblock-newsfeed', function() {
+        unblockNewsfeed(this);
+        
+	});
+
+   // Delete Newsfeed Post
+	$(document).on('click', '.delete-newsfeed', function() {
+        deleteNewsfeed(this);
+	});
+    
+    // Newsfeed Model-popup
+	$(document).on('click', '.edit-newsfeed', function() {
+        editNewsFeed(this);
+        
+	})
+
+
+    @if(Session::has('message'))
+	toastr.options = {
+		"closeButton": true,
+		"progressBar": true
+	}
+	toastr.success("{{ session('message') }}");
+	@endif
+
+	   
+
+    
+
+    $(document).ready(function() {
+		$('.comment-form').on('submit', function(e) {
+			e.preventDefault();
+            commentForm(this);
+
+            
+		});
+	});
+
+    // Add Friend
+	$(document).on('click', '.add-friend', function() {
+        addFriend(this);
+        
+	});
+
+    // Comment Model-popup
+    $(document).on('click', '.edit-comment', function() {
+        editComment(this);
+    })
+
+    // Delete comment Post
+	$(document).on('click', '.delete-comment', function() {
+        deleteComment(this);
+    });
+
+    // Post Reply Comment
+
+	$('.comment-reply-form').on('submit', function(e) {
+		e.preventDefault();
+        CommentReplyForm(this);
+        
+	});
+
+
+    // Reply Comment Model-popup
+	$(document).on('click', '.edit-reply-comment', function() {
+        editReplyComment(this);
+    })
+
+
+
+    // Delete comment Post
+	$(document).on('click', '.delete-reply-comment', function() {
+        deleteReplyComment(this);
+        
+	});
+
+    // View More Comments+
+	$(document).on('click', '.more-comments', function() {
+		moreComments(this);
+	});
+
+    // Model Close
+	$(".close-newsfeed-model").click(function() {
+		$("#newsfeedModal").modal('hide');
+	});
+	$(".close-comment-model").click(function() {
+		$("#commentModal").modal('hide');
+	});
+
+	$(".close-reply-comment-model").click(function() {
+		$("#replyCommentModal").modal('hide');
+	});
+	$('.newsfeed_update_btn').click(function() {
+		$('.newsfeed_form').submit();
+	});
+
+    // Update Newsfeed
+	$('.newsfeed_form').on('submit', function(e) {
+		e.preventDefault();
+        NewsfeedForm();
+        
+	});
+
+    $('.comment_update_btn').on('click', function() {
+		$('.comment_form').submit();
+	});
+	// Update Comment
+	$('.comment_form').on('submit', function(e) {
+		e.preventDefault();
+		CommentForm_2();
+        
+	});
+
+    $('.comment_reply_form').on('submit', function(e) {
+		e.preventDefault();
+        CommentReplyForm_2();
+        
+	});
+
+    */
+
+
+function clickFunctionality() {
+	$('.comment-form').on('submit', function(e) {
+			e.preventDefault();
+			commentForm(this);
+		});
+
+		$(".image_upload1").unbind('click');
+		$(".image_upload1").click(function() {
+			$("input[id='my_file1']").click();
+		});
+
+		$(".image_upload2").unbind('click');
+		$(".image_upload2").click(function() {
+			$("input[id='my_file2']").click();
+		});
+
+		$(".image_upload3").unbind('click');
+		$(".image_upload3").click(function() {
+			$("input[id='my_file3']").click();
+		});
+
+		$('.comment-form').hide();
+
+		$(".comment_btn").unbind('click');
+		$(".comment_btn").click(function() {  
+			var id = $(this).attr('id');
+			$(".comment_add_" + id).toggle();
+		});
+
+		$('.comment-reply-form').hide();
+		$(".comment_reply_btn").unbind('click');
+		$(".comment_reply_btn").click(function() {
+			var id = $(this).attr('id');
+			$(".comment_reply_add_" + id).toggle();
+		});
+
+		$('.comment-reply-child-form').hide();
+		$(".comment_reply_child_btn").unbind('click');
+		$(".comment_reply_child_btn").click(function() {
+			var id = $(this).attr('id');
+			$(".comment_reply_child_add_" + id).toggle();
+		});
+
+		$(".postFollow").unbind('click');
+		$('.postFollow').on('click', function() {
+			postFollow(this);
+		});
+
+		$(document).off('click', '.likeCommentPost');
+		$(document).on('click', '.likeCommentPost', function() {
+			likeCommentPost(this);
+		});
+
+		$(document).off('click', '.likeReplyCommentPost');
+		$(document).on('click', '.likeReplyCommentPost', function() { 
+			likeReplyCommentPost(this); 
+		});
+}
+function reAddClickFunctions()
+{
+	$('.share-post-btn').on('click', function() { sharePost() });
+
+	$(document).off('click', '.likePost');
+	$(document).on('click', '.likePost', function() { likePost(this); });
+
+	// Block Newsfeed Post
+	$(document).off('click', '.block-newsfeed');
+	$(document).on('click', '.block-newsfeed', function() { 
+		blocknewsfeed(this);
+	});
+	// Block Newsfeed Post
+	$(document).off('click', '.unblock-newsfeed');
+	$(document).on('click', '.unblock-newsfeed', function() {
+		unblockNewsfeed(this);
+	});
+	// Delete Newsfeed Post
+	$(document).off('click', '.delete-newsfeed');
+	$(document).on('click', '.delete-newsfeed', function() {
+		deleteNewsfeed(this);
+	});
+
+	// Newsfeed Model-popup
+	$(document).off('click', '.edit-newsfeed');
+	$(document).on('click', '.edit-newsfeed', function() {
+		editNewsFeed(this);
+		
+	})
+
+	 // Update Comment
+	$('.comment_form').on('submit', function(e) {
+		e.preventDefault();
+		CommentForm_2();
+	});
+
+	// Add Friend
+	$(document).off('click', '.add-friend');
+	$(document).on('click', '.add-friend', function() {
+		addFriend(this);
+		
+	});
+	// Comment Model-popup
+	$(document).off('click', '.edit-comment');
+	$(document).on('click', '.edit-comment', function() {
+		editComment(this);
+		
+	})
+	// Delete comment Post
+	$(document).off('click', '.delete-comment');
+	$(document).on('click', '.delete-comment', function() {
+		deleteComment(this);
+	});
+
+	// Post Reply Comment
+
+	$(".comment-reply-form").unbind('click');
+	$('.comment-reply-form').on('submit', function(e) {
+		e.preventDefault();
+		CommentReplyForm(this);
+	});
+
+	$('.comment-reply-child-form').on('submit', function(e) {
+		e.preventDefault();
+		CommentReplyChildForm(this);
+	});
+
+	// Reply Comment Model-popup
+	$(document).off('click', '.edit-reply-comment');
+	$(document).on('click', '.edit-reply-comment', function() {
+		editReplyComment(this);
+	})
+
+	// Delete comment Post
+	$(document).off('click', '.delete-reply-comment');
+	$(document).on('click', '.delete-reply-comment', function() {
+		deleteReplyComment(this);
+	});
+	// View More Comments+
+	$(document).off('click', '.more-comments');
+	$(document).on('click', '.more-comments', function() {
+		moreComments(this);
+	});
+
+	// Model Close
+	$(".close-newsfeed-model").unbind('click');
+	$(".close-newsfeed-model").click(function() {
+		$("#newsfeedModal").modal('hide');
+	});
+
+	$(".close-comment-model").unbind('click');
+	$(".close-comment-model").click(function() {
+		$("#commentModal").modal('hide');
+	});
+
+	$(".close-reply-comment-model").unbind('click');
+	$(".close-reply-comment-model").click(function() {
+		$("#replyCommentModal").modal('hide');
+	});
+
+	$(".newsfeed_update_btn").unbind('click');
+	$('.newsfeed_update_btn').click(function() {
+		$('.newsfeed_form').submit();
+	});
+	// Update Newsfeed
+	$('.newsfeed_form').on('submit', function(e) {
+		e.preventDefault();
+		NewsfeedForm();
+	});
+
+	$(".comment_update_btn").unbind('click');
+	$('.comment_update_btn').on('click', function() {
+		$('.comment_form').submit();
+	});
+	
+
+	// // Update Comment Reply
+	$('.comment_reply_form').on('submit', function(e) {
+		e.preventDefault();
+        CommentReplyForm_2();
+	});
+
+	$('#my_file1').change(function() {
+		filePreview(this);
+	});
+
+	
+
+	$('.facemocion').faceMocion({
+		emociones: [{
+				"emocion": "amo",
+				"TextoEmocion": "I love"
+			},
+			{
+				"emocion": "divierte",
+				"TextoEmocion": "I enjoy"
+			},
+			{
+				"emocion": "gusta",
+				"TextoEmocion": "I like"
+			},
+			{
+				"emocion": "asombro",
+				"TextoEmocion": "It amazes me"
+			},
+			{
+				"emocion": "alegre",
+				"TextoEmocion": "I am glad"
+			}
+		]
+	});
+
+}
+
+
+$(document).ready(function() { clickFunctionality(); });
+reAddClickFunctions();	
+
+var page = 2;
+$(window).scroll(function() {
+   if($(window).scrollTop() + $(window).height() == $(document).height()) {
+	   if (page !== false) {
+       $.get( "{{ url('/load-more-profilefeed') }}/{{$userstring}}?page=" + page, function( data ) { 
+            page++; 
+			jQuery('#newsfeedposts').append(data);
+		    reAddClickFunctions();
+			clickFunctionality();
+			if (data == '') { page = false; }
+		});
+	}
+   }
+});
+
+
+
 </script>
 @endsection

@@ -279,6 +279,9 @@ Route::group(['middleware' => ['auth']], function () {
         Route::post('/change-password/updatePassword', 'updatePassword')->name('change-password-save');
         Route::get('profile/about', 'aboutProfile')->name('about');
         Route::get('profile/user/{user}', 'friendlistUserProfile')->name('user-profile');
+
+        Route::get('/load-more-profilefeed/{user}', 'loadMore')->name('load-more-profilefeed');
+
         Route::get('payment/setting', 'paymentSetting')->name('payment-setting');
         Route::post('/change/payment/setting', 'updatePaymentSetting')->name('payment-setting-post');
         Route::get('plan/upgrade', 'planUpgrade')->name('plan-upgrade');

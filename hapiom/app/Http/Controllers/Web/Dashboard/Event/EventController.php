@@ -12,6 +12,7 @@ use App\Models\Groupmaster;
 use App\Models\GroupUser;
 use Auth;
 use DB;
+use App\Repositories\Notifications\NotificationsRepository;
 
 class EventController extends Controller
 {
@@ -63,19 +64,21 @@ class EventController extends Controller
         return response()->json('ok');
     }
 
-    public function approve($id)
+    public function approve($id, NotificationsRepository $notificationsRepository)
     {
         $event = Event::find($id);
         $event->status = 1;
+        $notificationsRepository->eventApproved($id, Auth::user()->id, $event->status, $event);
         $event->save();
 
         return response()->json('ok');
     }
 
-    public function reject($id)
+    public function reject($id, NotificationsRepository $notificationsRepository)
     {
         $event = Event::find($id);
         $event->status = 2;
+        $notificationsRepository->eventApproved($id, Auth::user()->id, $event->status, $event);
         $event->save();
 
         return response()->json('ok');

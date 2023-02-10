@@ -490,7 +490,37 @@ class CommentController extends Controller
                                 <h6>' . ucwords($comment->NewsfeedUser->name) . '</h6>
                                 <p class="mb-0 comment-text-'. $comment->id . '">' . $comment->comment . '</p>
                                 <div class="d-flex flex-wrap align-items-center comment-activity">
-                                    <a href="javascript:void();" class="likeCommentPost" comment_id="' . $comment->id . '" newsfeed_id="' . $request->newsfeed_id . '" route="' . route('newsfeed-comment-like') . '" users_id="' . Auth::user()->id . '">like</a>
+
+                                <div class="dropdown">
+													<span>&nbsp;
+														<a href="javascript:void();" class="likeCommentPost" comment_id='. $comment->id .' newsfeed_id="'.$request->newsfeed_id.'" route="'. route('newsfeed-comment-like') . '" users_id="'. Auth::user()->id .'">';
+															if($comment->NewsfeedcommentLike->count() > 0):
+															$hasMe = null;  
+															foreach($comment->NewsfeedcommentLike as $newlike) {
+															if($newlike->user_id !== Auth::user()->id):
+															$hasMe = null;
+															continue;
+                                                            else:
+															$hasMe = true; 
+															if($newlike->face_icon):
+                                                                $output .='<input type="hidden" value="'.$newlike->face_icon .'" class="facemocion" />';
+                                                            else:
+                                                                $output .='<input type="hidden" value="gusta" class="facemocion" />';
+            endif;
+            endif;
+         }
+															if(!$hasMe):
+                                                                $output .='<input type="hidden" value="gusta" class="facemocion" />';
+            endif;
+        else:
+            $output .='<input type="hidden" value="gusta" class="facemocion" />';
+            endif;
+            $output .='</a>';
+
+                                                        $output .='</span>';
+                                                    $output .='</div>';
+
+                        $output .='<a href="javascript:void();" class="likeCommentPost" comment_id="' . $comment->id . '" newsfeed_id="' . $request->newsfeed_id . '" route="' . route('newsfeed-comment-like') . '" users_id="' . Auth::user()->id . '"><span id="" class="total_comment_like_count_'.$comment->id.'">'.($comment->NewsfeedcommentLike ? $comment->NewsfeedcommentLike->count() : "0").'</span> like</a>
                                     <a href="javascript:void();">reply</a>
                                     <a href="javascript:void();">translate</a>
                                     <span> ' . newsfeeddateformate($comment->created_at) . ' </span>

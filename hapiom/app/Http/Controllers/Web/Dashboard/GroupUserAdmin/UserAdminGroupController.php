@@ -15,6 +15,7 @@ use App\Models\Groupmaster;
 use Auth;
 use App\Models\GroupUser;
 use App\Models\Event;
+use App\Repositories\Notifications\NotificationsRepository;
 
 class UserAdminGroupController extends Controller
 {
@@ -61,10 +62,11 @@ class UserAdminGroupController extends Controller
         return view('dashboard.pages.groupuseradmin.detail', compact('groupUsers', 'groupEvents'));
     }
 
-    public function groupAction($group_id,$user_id,$status)
+    public function groupAction($group_id, $user_id, $status, NotificationsRepository $notificationsRepository)
     {
         $action = GroupUser::where(['group_id' =>$group_id,'user_id' => $user_id])->update(['status' => $status]);
         if ($action) {
+            $notificationsRepository->groupJoinApproved($group_id, $user_id, $status);
             flashWebResponse('message', 'You have successfully change action.');
             return redirect()->route('group-details',$group_id);
         }

@@ -24,25 +24,49 @@
 								<h4 class="card-title">Create Post</h4>
 							</div>
 						</div>
-						<div class="iq-card-body" data-toggle="modal" data-target="#post-modal">
-							<div class="d-flex align-items-center">
-								<div class="user-img">
-									@if(isset($userinfo->profile_image) && file_exists('images/profile'. $userinfo->profile_image))
-									<img src="{{ url('images/profile',$userinfo->profile_image ) }}" alt="userimg" class="avatar-60 rounded-circle">
-									@else
-									<img src="{{url('assets/dashboard/img/default-avatar.png')}}" alt="userimg" class="avatar-60 rounded-circle">
-									@endif
-								</div>
-								<form class="post-text ml-3 w-100" action="javascript:void();">
-									<input type="text" class="form-control" placeholder="What's on your mind?" style="border:none;">
+						<div class="iq-card-body">
+							<div class=" ">
+
+								<form method="post" action="{{ route('newsfeed-create') }}" enctype="multipart/form-data" id="post_upload_Form"  >
+									@csrf
+									<div>
+										<div class="d-flex align-items-center">
+											<div class="user-img">
+												@if(isset($userinfo->profile_image) && file_exists('images/profile/'. $userinfo->profile_image))
+												<img src="{{ url('images/profile',$userinfo->profile_image ) }}" alt="userimg" class="avatar-60 rounded-circle">
+												@else
+												<img src="{{url('assets/dashboard/img/default-avatar.png')}}" alt="userimg" class="avatar-60 rounded-circle">
+												@endif
+											</div>
+											<div class="caption ml-2">
+												<h5 class="mb-0 line-height">{{ ucwords(Auth::user()->name) }}</h5>
+											</div>
+										</div>
+										<input type="text" class="form-control mt-3" name="textpost" placeholder="What's on your mind?" style="border-radius:20px;">
+
+										<input type="hidden" name="group_id" value="{{ @$group_id }}">
+										<hr>
+										<ul class="d-flex flex-wrap align-items-center list-inline m-0 p-0">
+											<li class="col-md-6 mb-3 d-flex">
+												<div class="iq-bg-primary rounded p-2 pointer mr-3 image_upload1"><img src="{{ url('assets/dashboard/images/small/07.png') }}" alt="icon" class="img-fluid "> Photo/Video</div>
+												<input class="d-none" id="my_file1" type="file" name="image[]" multiple>
+												<div id="preview_embed"></div>
+											</li>
+										</ul>
+										<hr>
+										<div class="other-option">
+											<div class="d-flex align-items-center justify-content-between">
+
+
+											</div>
+										</div>
+										<button type="submit" class="btn btn-primary d-block w-100 mt-3">Post</button>
+									</div>
 								</form>
 							</div>
-							<hr>
-							<ul class="post-opt-block d-flex align-items-center list-inline m-0 p-0">
-								<li class="iq-bg-primary rounded p-2 pointer mr-3"><a href="#"></a><img src="{{ url('assets/dashboard/images/small/07.png') }}" alt="icon" class="img-fluid"> Photo/Video</li>
-							</ul>
+
 						</div>
-						<div class="modal fade" id="post-modal" tabindex="-1" role="dialog" aria-labelledby="post-modalLabel" aria-hidden="true" style="display: none;">
+					<!--	<div class="modal fade" id="post-modal" tabindex="-1" role="dialog" aria-labelledby="post-modalLabel" aria-hidden="true" style="display: none;">
 							<div class="modal-dialog" role="document">
 								<div class="modal-content">
 									<div class="modal-header">
@@ -87,9 +111,10 @@
 									</form>
 								</div>
 							</div>
-						</div>
+						</div>-->
 					</div>
 				</div>
+				<div id="newsfeedposts">
 				@php
 				$i = 1;
 				$j = 1;
@@ -101,15 +126,17 @@
 							<div class="user-post-data">
 								<div class="d-flex flex-wrap">
 									<div class="media-support-user-img mr-3">
-										@if(isset($result->userImageByPost->profile_image) && file_exists('images/profile'. $result->userImageByPost->profile_image))
+										@if(isset($result->userImageByPost->profile_image) && file_exists('images/profile/'. $result->userImageByPost->profile_image))
 										<img class="rounded-circle img-fluid" src="{{ url('images/profile',$result->userImageByPost->profile_image) }}" alt="">
 										@else
 										<img class="rounded-circle img-fluid" src="{{url('assets/dashboard/img/default-avatar.png')}}" alt="">
 										@endif
 									</div>
 									<div class="media-support-info mt-2">
-										<h5 class="mb-0 d-inline-block"><a href="#" class="">{{ ucwords($result->NewsfeedUser->name) }}</a></h5>
+										<h5 class="mb-0 d-inline-block"><a href="{{ route('user-profile',encrypt($result->user_id)) }}" class="">{{ ucwords($result->NewsfeedUser->name) }}</a></h5>
+										@if ($result->user_id != $my_user_id)
 										<p class="mb-0 d-inline-block pl-3"><a href="javascript:void(0)" route="{{ route('newsfeed-follow')}}" newsfeed_id="{{ $result->id }}" user_id="{{ $result->user_id }}" following_id="{{ Auth::user()->id }}" class="postFollow" id="post-follow-{{ $result->id }}"><i class="ri-user-follow-line line-height-17"></i>Follow</a></p>
+										@endif
 										<p class="mb-0 text-primary">{{ newsfeeddateformate($result->created_at) }}</p>
 									</div>
 									<div class="iq-card-post-toolbar">
@@ -223,7 +250,7 @@
 													<input type="hidden" id="newsfeed_id_{{ $i }}" value="{{ $result->id }}" disabled="">
 													<input type="hidden" id="user_id_{{ $i }}" value="{{ $result->user_id }}" disabled="">
 													<input type="hidden" id="likes_id_{{ $i }}" value="{{ Auth::user()->id }}" disabled="">
-													<div class="dropdown-menu">
+													<div class="dropdown-menu" @if($result->NewsfeedLike->count() == 0) style="background: #fff; border: 0 none;" @endif>
 														@if($result->NewsfeedLike->count() > 0)
 														@php $like = 0; @endphp
 														@foreach($result->NewsfeedLike as $newlike)
@@ -269,6 +296,37 @@
 												<h6>{{ ucwords($comment->NewsfeedUser->name) }}</h6>
 												<p class="mb-0 comment-text-{{ $comment->id }}">{{ ucwords($comment->comment) }}</p>
 												<div class="d-flex flex-wrap align-items-center comment-activity">
+<!------------------------------------------------->
+												<div class="dropdown">
+													<span>&nbsp;
+														<a href="javascript:void();" class="likeCommentPost" comment_id="{{ $comment->id }}" newsfeed_id="{{ $result->id }}" route="{{ route('newsfeed-comment-like')}}" users_id="{{ Auth::user()->id }}">
+															@if($comment->NewsfeedcommentLike->count() > 0)
+															@php $hasMe = null; @endphp
+															@foreach($comment->NewsfeedcommentLike as $newlike)
+															@if($newlike->user_id !== Auth::user()->id)
+															@php $hasMe = null; @endphp
+															@continue;
+															@else
+															@php $hasMe = true; @endphp
+															@if($newlike->face_icon)
+															<input type="hidden" value="{{ $newlike->face_icon }}" class="facemocion" />
+															@else
+															<input type="hidden" value="gusta" class="facemocion" />
+															@endif
+															@endif
+															@endforeach
+															@if(!$hasMe)
+															<input type="hidden" value="gusta" class="facemocion" />
+															@endif
+															@else
+															<input type="hidden" value="gusta" class="facemocion" />
+															@endif
+														</a>
+
+													</span>
+												</div>
+		<!------------------------------------------------->										
+
 													<a href="javascript:void();" class="likeCommentPost" comment_id="{{ $comment->id }}" newsfeed_id="{{ $result->id }}" route="{{ route('newsfeed-comment-like')}}" users_id="{{ Auth::user()->id }}"><span id="" class="total_comment_like_count_{{ $comment->id }}">{{ $comment->NewsfeedcommentLike ? $comment->NewsfeedcommentLike->count() : "0"  }}</span> like</a>
 													<a href="javascript:void();" class="reply comment_reply_btn" id="{{ $comment->id}}">reply</a>
 													<a href="javascript:void();">translate</a>
@@ -332,7 +390,7 @@
 							if ($result->NewsfeedComment->count() >= 2) {
 								$view_more = 'View ' . $result->NewsfeedComment->count() - 1 . ' more comments +';
 							} else {
-								$view_more = 'No comment found.';
+								$view_more = '';
 							} ?>
 							<a href="javascript:void(0)" newsfeed_id="{{$result->id}}" route="{{ route('view-more-comments') }}" class="more-comments view-more-comment-btn-{{$result->id}}">{{$view_more}}</a>
 						</div>
@@ -344,7 +402,7 @@
 				@endphp
 				@endforeach
 
-			</div>
+			</div></div>
 			<div class="col-lg-4">
 				<div class="iq-card">
 					<div class="iq-card-header d-flex justify-content-between">
@@ -356,9 +414,9 @@
 						<ul class="media-story m-0 p-0">
 							@foreach($friends as $value)
 							<li class="d-flex mb-4 align-items-center active add-friend-{{ $value->id }}">
-								@if (isset($value->userInfo->profile_image) && file_exists('images/profile/'. $value->userInfo->profile_image))
+								@if (isset($value->profile_image) && file_exists('images/profile/'. $value->profile_image))
 								<a href="{{ route('user-profile',encrypt($value->id)) }}">
-									<img src="{{url('images/profile/', $value->userInfo->profile_image)}}" class="rounded-circle img-fluid" alt="user">
+									<img src="{{url('images/profile/', $value->profile_image)}}" class="rounded-circle img-fluid" alt="user">
 								</a>
 								@else
 								<a href="{{ route('user-profile',encrypt($value->id)) }}">
@@ -421,7 +479,7 @@
 						</div>
 					</div>
 					<div class="iq-card-body">
-						@if($acceptedFriends && count($acceptedFriends) > 0)
+						@if(isset($acceptedFriends) && $acceptedFriends && count($acceptedFriends) > 0)
 						<ul class="media-story m-0 p-0">
 							@foreach($acceptedFriends as $value)
 							@php
@@ -607,53 +665,25 @@
 @section('page-js-link') @endsection
 @section('page-js')
 
+
 <script type="text/javascript">
-	$('.share-post-btn').on('click', function() {
+	function sharePost() {
 		let newsfeed_id = $('.share-post-btn').attr('newsfeed-id');
 		let username = $('.share-post-btn').attr('username');
 		let subject = `${encodeURIComponent('See this post by @' + username)}`;
 		let body = subject + `${encodeURIComponent('{{url()->current()}}')}`;
 		let mailtoURL = 'mailto:?subject=' + subject + '&body=' + body;
 		$('.share-post-btn').attr('href', mailtoURL);
-	});
-	$(document).ready(function() {
-		$(".image_upload1").click(function() {
-			$("input[id='my_file1']").click();
-		});
+	}
 
-		$(".image_upload2").click(function() {
-			$("input[id='my_file2']").click();
-		});
-
-		$(".image_upload3").click(function() {
-			$("input[id='my_file3']").click();
-		});
-
-		$('.comment-form').hide();
-		$(".comment_btn").click(function() {
-			var id = $(this).attr('id');
-			$(".comment_add_" + id).toggle();
-		});
-
-		$('.comment-reply-form').hide();
-		$(".comment_reply_btn").click(function() {
-			var id = $(this).attr('id');
-			$(".comment_reply_add_" + id).toggle();
-		});
-
-		$('.comment-reply-child-form').hide();
-		$(".comment_reply_child_btn").click(function() {
-			var id = $(this).attr('id');
-			$(".comment_reply_child_add_" + id).toggle();
-		});
-
-		$(document).on('click', '.likePost', function() {
-			newsfeed_id = $(this).attr('newsfeed_id');
-			user_id = $(this).attr('user_id');
-			likes_id = $(this).attr('likes_id');
-			route = $(this).attr('route');
-			face_icon = $(this).find('input').val();
-
+	function likePost($this) {  
+		newsfeed_id = $($this).attr('newsfeed_id');
+			user_id = $($this).attr('user_id');
+			likes_id = $($this).attr('likes_id');
+			route = $($this).attr('route');
+			face_icon = $($this).find('input').val();
+            //alert(route);
+			//return;
 			$.ajax({
 				url: route,
 				method: "GET",
@@ -667,7 +697,9 @@
 				beforeSend: function() {},
 				success: function(data) {
 					console.log('data', data);
-					$('.likePost').find('input').val(data['newsfeedLike']);
+					if (null !== (data['newsfeedLike'])) {
+						$('.likePost').find('input').val(data['newsfeedLike']['face_icon']);
+				    }
 					if (data['is_like'] === true) {
 						html = `<i class="ri-thumb-down-line mr-2"></i>Unlike Page`;
 						$('.like1Color_' + newsfeed_id).html(html);
@@ -682,104 +714,108 @@
 					$('.total_count_' + newsfeed_id).html(data['count']);
 				}
 			})
-		});
-		$('.postFollow').on('click', function() {
-			newsfeed_id = $(this).attr('newsfeed_id');
-			user_id = $(this).attr('user_id');
-			following_id = $(this).attr('following_id');
-			route = $(this).attr('route');
+	}
 
-			$.ajax({
-				url: route,
-				method: "POST",
-				data: {
-					"_token": "{{ csrf_token() }}",
-					"newsfeed_id": newsfeed_id,
-					"user_id": user_id,
-					"following_id": following_id,
-				},
-				beforeSend: function() {},
-				success: function(response) {
-					if (response.data.is_follow === true) {
-						$('#post-follow-' + newsfeed_id).html('');
-						html = '<i class="ri-user-unfollow-line line-height-17"></i>Unfollow';
-						$('#post-follow-' + newsfeed_id).html(html);
-						$('#post-follow-' + newsfeed_id).css('color', 'black');
-						$('#post-follow-' + newsfeed_id).css('font-weight', 'bold');
-					} else {
-						$('#post-follow-' + newsfeed_id).html('');
-						html = '<i class="ri-user-follow-line line-height-17"></i>Follow';
-						$('#post-follow-' + newsfeed_id).html(html);
-						$('#post-follow-' + newsfeed_id).css('color', '#50b5ff');
-						$('#post-follow-' + newsfeed_id).css('font-weight', 'normal');
-					}
-					//$('.total_count_' + newsfeed_id).html(data['count']);
-				}
-			})
-		});
+	function postFollow($this) {
+		newsfeed_id = $($this).attr('newsfeed_id');
+		user_id = $($this).attr('user_id');
+		following_id = $($this).attr('following_id');
+		route = $($this).attr('route');
 
-		$(document).on('click', '.likeCommentPost', function() {
-			newsfeed_id = $(this).attr('newsfeed_id');
-			users_id = $(this).attr('users_id');
-			comment_id = $(this).attr('comment_id');
-			route = $(this).attr('route');
-			$.ajax({
-				url: route,
-				method: "GET",
-				data: {
-					"_token": "{{ csrf_token() }}",
-					"newsfeed_id": newsfeed_id,
-					"comment_id": comment_id,
-					"users_id": users_id,
-				},
-				beforeSend: function() {},
-				success: function(data) {
-					if (data['is_like'] === true) {
-						$('.commentlikeColor_' + comment_id).css("background-color", "#ff5e3a");
-					} else {
-						$('.commentlikeColor_' + comment_id).css("background-color", "#fafbfd");
-					}
-					$('.total_comment_like_count_' + comment_id).html(data['count']);
+		$.ajax({
+			url: route,
+			method: "POST",
+			data: {
+				"_token": "{{ csrf_token() }}",
+				"newsfeed_id": newsfeed_id,
+				"user_id": user_id,
+				"following_id": following_id,
+			},
+			beforeSend: function() {},
+			success: function(response) {
+				if (response.data.is_follow === true) {
+					$('#post-follow-' + newsfeed_id).html('');
+					html = '<i class="ri-user-unfollow-line line-height-17"></i>Unfollow';
+					$('#post-follow-' + newsfeed_id).html(html);
+					$('#post-follow-' + newsfeed_id).css('color', 'black');
+					$('#post-follow-' + newsfeed_id).css('font-weight', 'bold');
+				} else {
+					$('#post-follow-' + newsfeed_id).html('');
+					html = '<i class="ri-user-follow-line line-height-17"></i>Follow';
+					$('#post-follow-' + newsfeed_id).html(html);
+					$('#post-follow-' + newsfeed_id).css('color', '#50b5ff');
+					$('#post-follow-' + newsfeed_id).css('font-weight', 'normal');
 				}
-			})
-		});
-		$(document).on('click', '.likeReplyCommentPost', function() {
-			newsfeed_id = $(this).attr('newsfeed_id');
-			users_id = $(this).attr('users_id');
-			comment_id = $(this).attr('comment_id');
-			reply_comment_id = $(this).attr('reply_comment_id');
-			route = $(this).attr('route');
-			$.ajax({
-				url: route,
-				method: "GET",
-				data: {
-					"_token": "{{ csrf_token() }}",
-					"newsfeed_id": newsfeed_id,
-					"comment_id": comment_id,
-					"users_id": users_id,
-					"reply_comment_id": reply_comment_id
-				},
-				beforeSend: function() {},
-				success: function(data) {
-					if (data['is_like'] === true) {
-						$('.replycommentlikeColor_' + reply_comment_id).css("background-color", "#ff5e3a");
-					} else {
-						$('.replycommentlikeColor_' + reply_comment_id).css("background-color", "#fafbfd");
-					}
-					$('.total_reply_comment_like_count_' + reply_comment_id).html(data['count']);
-				}
-			})
-		});
-	});
+				//$('.total_count_' + newsfeed_id).html(data['count']);
+			}
+		})
+	}
 
-	// Block Newsfeed Post
-	$(document).on('click', '.block-newsfeed', function() {
+	function likeCommentPost($this) {
+		newsfeed_id = $($this).attr('newsfeed_id');
+		users_id = $($this).attr('users_id');
+		comment_id = $($this).attr('comment_id');
+		route = $($this).attr('route');
+		face_icon = $($this).find('input').val();
+		$.ajax({
+			url: route,
+			method: "GET",
+			data: {
+				"_token": "{{ csrf_token() }}",
+				"newsfeed_id": newsfeed_id,
+				"comment_id": comment_id,
+				"users_id": users_id,
+				"face_icon": face_icon,
+			},
+			beforeSend: function() {},
+			success: function(data) {  
+				if (data['is_like'] === true) {
+					$('.commentlikeColor_' + comment_id).css("background-color", "#ff5e3a");
+				} else {
+					$('.commentlikeColor_' + comment_id).css("background-color", "#fafbfd");
+				}
+				 
+				$('.total_comment_like_count_' + comment_id).html(data['count']);
+				 
+			}
+		})
+	}
+
+	function likeReplyCommentPost($this) {
+		newsfeed_id = $($this).attr('newsfeed_id');
+		users_id = $($this).attr('users_id');
+		comment_id = $($this).attr('comment_id');
+		reply_comment_id = $($this).attr('reply_comment_id');
+		route = $($this).attr('route');
+		$.ajax({
+			url: route,
+			method: "GET",
+			data: {
+				"_token": "{{ csrf_token() }}",
+				"newsfeed_id": newsfeed_id,
+				"comment_id": comment_id,
+				"users_id": users_id,
+				"reply_comment_id": reply_comment_id
+			},
+			beforeSend: function() {},
+			success: function(data) {
+				if (data['is_like'] === true) {
+					$('.replycommentlikeColor_' + reply_comment_id).css("background-color", "#ff5e3a");
+				} else {
+					$('.replycommentlikeColor_' + reply_comment_id).css("background-color", "#fafbfd");
+				}
+				$('.total_reply_comment_like_count_' + reply_comment_id).html(data['count']);
+			}
+		})
+	}
+
+	function blocknewsfeed($this) {
 		toastr.options = {
 			"closeButton": true,
 			"newestOnTop": true,
 			"positionClass": "toast-top-right"
 		};
-		newsfeed_id = $(this).attr('newsfeed_id');
+		newsfeed_id = $($this).attr('newsfeed_id');
 		var route = "{{url('/block-newsfeed/')}}" + '/' + newsfeed_id;
 		$.ajax({
 			url: route,
@@ -797,16 +833,16 @@
 				}
 			}
 		})
-	});
-	// Block Newsfeed Post
-	$(document).on('click', '.unblock-newsfeed', function() {
+	}
+
+	function unblockNewsfeed($this) {
 		toastr.options = {
 			"closeButton": true,
 			"newestOnTop": true,
 			"positionClass": "toast-top-right"
 		};
 
-		newsfeed_id = $(this).attr('newsfeed_id');
+		newsfeed_id = $($this).attr('newsfeed_id');
 		var route = "{{url('/unblock-newsfeed/')}}" + '/' + newsfeed_id;
 
 		$.ajax({
@@ -825,16 +861,16 @@
 				}
 			}
 		})
-	});
-	// Delete Newsfeed Post
-	$(document).on('click', '.delete-newsfeed', function() {
-		newsfeed_id = $(this).attr('newsfeed_id');
+	}
+
+	function deleteNewsfeed($this) {
+		newsfeed_id = $($this).attr('newsfeed_id');
 		toastr.options = {
 			"closeButton": true,
 			"newestOnTop": true,
 			"positionClass": "toast-top-right"
 		};
-		route = $(this).attr('route');
+		route = $($this).attr('route');
 		if (confirm("Are You Sure to delete this newsfeed post ?") == true) {
 			$.ajax({
 				url: route,
@@ -851,13 +887,23 @@
 				}
 			})
 		}
+	}
 
-	});
+	// Post Comment
+	function doComment(event, newsfeed_id) {
+		if (event.keyCode == 13) {
+			let comment = $('.comment-text-' + newsfeed_id).text();
+			if (!event.shiftKey && comment) {
+				$('.comment_add_' + newsfeed_id).submit();
+				event.stopPropagation();
+			}
+		}
 
-	// Newsfeed Model-popup
-	$(document).on('click', '.edit-newsfeed', function() {
-		newsfeed_id = $(this).attr('newsfeed_id');
-		route = $(this).attr('route');
+	}
+
+	function editNewsFeed($this) {
+		newsfeed_id = $($this).attr('newsfeed_id');
+		route = $($this).attr('route');
 
 		$.ajax({
 			url: route,
@@ -892,242 +938,16 @@
 
 			}
 		})
-	})
-
-	@if(Session::has('message'))
-	toastr.options = {
-		"closeButton": true,
-		"progressBar": true
 	}
-	toastr.success("{{ session('message') }}");
-	@endif
-
-	// Load More Functionality...
-	$(document).ready(function() {
-		$(".load-more").on('click', function() {
-			var _totalCurrentResult = $(".main-div").length;
-			route = $(this).attr('route');
-			// Ajax Reuqest
-			$.ajax({
-				url: route,
-				type: 'get',
-				dataType: 'json',
-				data: {
-					skip: _totalCurrentResult
-				},
-				beforeSend: function() {
-					// $(".load-more").html('Loading...');
-				},
-				success: function(response) {
-					if (response.length != 0) {
-						// $(".load-more").html('ABC See More');
-						var _html = response;
-						$(".newsfeedItem").append(_html);
-						$('.comment-reply-form').hide();
-						$(".comment_btn").click(function() {
-							var id = $(this).attr('id');
-							$(".comment_add_" + id).toggle();
-						});
-
-						$('.comment-form').hide();
-						$('.comment-reply-form').hide();
-						$(".comment_reply_btn").click(function() {
-							var id = $(this).attr('id');
-							$(".comment_reply_add_" + id).toggle();
-						});
-
-						$('.comment-reply-child-form').hide();
-						$(".comment_reply_child_btn").click(function() {
-							var id = $(this).attr('id');
-							$(".comment_reply_child_add_" + id).toggle();
-						});
-						$('.comment-form').on('submit', function(e) {
-							e.preventDefault();
-							let user_id = $(this).attr('user_id')
-							let newsfeed_id = $(this).attr('newsfeed_id')
-							let comment = $(".comment-text-" + newsfeed_id).val();
-							route = $(this).attr('route');
-
-							$.ajax({
-								url: route,
-								method: "POST",
-								data: {
-									"_token": "{{ csrf_token() }}",
-									comment: comment,
-									user_id: user_id,
-									newsfeed_id: newsfeed_id,
-								},
-								success: function(response) {
-									_html = response.data;
-									$('.comment_add_' + newsfeed_id).hide();
-									$(".comments_list_" + newsfeed_id).hide();
-									$(".hide-newsfeed_" + newsfeed_id).html(_html);
-									$('.comment-reply-form').hide();
-									$('.comment-text-' + newsfeed_id).val('');
-									$(".comment_reply_btn").click(function() {
-										var id = $(this).attr('id');
-										$(".cr_" + response.insertData.id).toggle();
-									});
-								},
-								error: function(response) {
-									$('.comment-error-' + newsfeed_id).text(response.responseJSON.errors.comment);
-								}
-							});
-						});
-						$('.comment-reply-form').on('submit', function(e) {
-							e.preventDefault();
-							let user_id = $(this).attr('user_id')
-							let newsfeed_id = $(this).attr('newsfeed_id')
-							let comment_id = $(this).attr('comment_id')
-
-							let comment = $(".comment-reply-text-" + comment_id).val();
-							route = $(this).attr('route');
-							if (comment === "") {
-								$('.comment-reply-error-' + comment_id).text("This field is required.");
-							} else {
-								$.ajax({
-									url: route,
-									method: "POST",
-									data: {
-										"_token": "{{ csrf_token() }}",
-										comment: comment,
-										user_id: user_id,
-										newsfeed_id: newsfeed_id,
-										comment_id: comment_id
-									},
-									success: function(response) {
-										alert(response);
-										$('.comment_reply_add_' + comment_id).hide();
-										$(".reply_comment_add_" + comment_id).append(response.data);
-										$('.comment-reply-child-form').hide();
-										$('.comment-reply-text-' + comment_id).val('');
-										$(".comment_reply_child_btn").click(function() {
-											var id = $(this).attr('id');
-											$(".crc_" + response.insertData.id).toggle();
-										});
-									},
-									error: function(response) {
-										$('.comment-reply-error-' + comment_id).text(response.responseJSON.errors.comment);
-									}
-								});
-							}
-						});
-						$('.comment-reply-child-form').on('submit', function(e) {
-							e.preventDefault();
-							let user_id = $(this).attr('user_id')
-							let newsfeed_id = $(this).attr('newsfeed_id')
-							let comment_id = $(this).attr('comment_id')
-							let reply_comment_id = $(this).attr('reply_comment_id')
-							let comment = $(".comment-reply-child-text-" + reply_comment_id).val();
-							route = $(this).attr('route');
-							if (comment === "") {
-								$('.comment-reply-child-error-' + reply_comment_id).text("This field is required.");
-							} else {
-								$.ajax({
-									url: route,
-									method: "POST",
-									data: {
-										"_token": "{{ csrf_token() }}",
-										comment: comment,
-										user_id: user_id,
-										newsfeed_id: newsfeed_id,
-										comment_id: comment_id
-									},
-									success: function(response) {
-										$('.comment_reply_child_add_' + reply_comment_id).hide();
-										$(".reply_comment_add_" + comment_id).append(response.data);
-										$('.comment-reply-child-form').hide();
-										$('.comment-reply-child-text-' + reply_comment_id).val('');
-										$(".comment_reply_child_btn").click(function() {
-											var id = $(this).attr('id');
-											$(".crc_" + response.insertData.id).toggle();
-										});
-									},
-									error: function(response) {
-										$('.comment-reply-child-error-' + comment_id).text(response.responseJSON.errors.comment);
-									}
-								});
-							}
-						});
-
-					} else {
-						$(".load-more").hide();
-						$(".no-result-found").html("No Result Found");
-					}
-				}
-			});
-		});
-	});
-	// Show Like Status
-	// $(document).ready( function () {
-	// 	route = "get-like-status";
-	//     $.ajax({
-	//         url: route,
-	//         method: "GET",
-	//         data: {
-	//             "_token": "{{ csrf_token() }}",
-	//         },
-	//         beforeSend: function() {
-	//         },
-	//         success: function(data) {
-	// 			data.forEach(element => {
-	// 				if(element.newsfeed_id){
-	// 					$('.post-add-icon .like1Color_'+element.newsfeed_id).css("color", "#ff5e3a");
-	// 					$('.post-add-icon'+element.newsfeed_id).css("color", "#ff5e3a","fill: #ff5e3a;");
-	// 				}
-	// 			});
-
-	//         }
-	//     })
-	// });
-
-	// Post Comment
-	function doComment(event, newsfeed_id) {
-		if (event.keyCode == 13) {
-			let comment = $('.comment-text-' + newsfeed_id).text();
-			if (!event.shiftKey && comment) {
-				$('.comment_add_' + newsfeed_id).submit();
-				event.stopPropagation();
-			}
-		}
-
-	}
-	$(document).ready(function() {
-		$('.comment-form').on('submit', function(e) {
-			e.preventDefault();
-			let user_id = $(this).attr('user_id')
-			let newsfeed_id = $(this).attr('newsfeed_id')
-			let comment = $(".comment-text-" + newsfeed_id).text();
-			route = $(this).attr('route');
-			$.ajax({
-				url: route,
-				method: "POST",
-				data: {
-					"_token": "{{ csrf_token() }}",
-					comment: comment,
-					user_id: user_id,
-					newsfeed_id: newsfeed_id,
-				},
-				success: function(response) {
-					location.reload();
-				},
-				error: function(response) {
-					$('.comment-error-' + newsfeed_id).text(response.responseJSON.errors.comment);
-				}
-			});
-		});
-	});
-
-	// Add Friend
-	$(document).on('click', '.add-friend', function() {
+    function addFriend($this) {
 		toastr.options = {
-			"closeButton": true,
-			"newestOnTop": true,
-			"positionClass": "toast-top-right"
-		};
+				"closeButton": true,
+				"newestOnTop": true,
+				"positionClass": "toast-top-right"
+			};
 
-		route = $(this).attr('route');
-		user_id = $(this).attr('user_id');
+		route = $($this).attr('route');
+		user_id = $($this).attr('user_id');
 		$.ajax({
 			url: route,
 			method: "GET",
@@ -1143,11 +963,11 @@
 				}
 			}
 		})
-	});
-	// Comment Model-popup
-	$(document).on('click', '.edit-comment', function() {
-		comment_id = $(this).attr('comment_id');
-		route = $(this).attr('route');
+	}
+
+	function editComment($this) {
+		comment_id = $($this).attr('comment_id');
+		route = $($this).attr('route');
 
 		$.ajax({
 			url: route,
@@ -1164,16 +984,16 @@
 				$('#edit-comment-id').val(data.id);
 			}
 		})
-	})
-	// Delete comment Post
-	$(document).on('click', '.delete-comment', function() {
-		comment_id = $(this).attr('comment_id');
+	}
+
+	function deleteComment($this) {
+		comment_id = $($this).attr('comment_id');
 		toastr.options = {
 			"closeButton": true,
 			"newestOnTop": true,
 			"positionClass": "toast-top-right"
 		};
-		route = $(this).attr('route');
+		route = $($this).attr('route');
 		if (confirm("Are you Sure to delete this comment ?") == true) {
 			$.ajax({
 				url: route,
@@ -1191,18 +1011,72 @@
 				}
 			})
 		}
-	});
+	}
+	function commentForm($this) 
+	{
+		let user_id = $($this).attr('user_id')
+		let newsfeed_id = $($this).attr('newsfeed_id')
+		let comment = $(".comment-text-" + newsfeed_id).text();
+		route = $($this).attr('route');
+		$.ajax({
+			url: route,
+			method: "POST",
+			data: {
+				"_token": "{{ csrf_token() }}",
+				comment: comment,
+				user_id: user_id,
+				newsfeed_id: newsfeed_id,
+			},
+			success: function(response) {
+				location.reload();
+			},
+			error: function(response) {
+				$('.comment-error-' + newsfeed_id).text(response.responseJSON.errors.comment);
+			}
+		});
+	}
 
-	// Post Reply Comment
+	function CommentForm_2() 
+	{
+        var formData = new FormData();
+		let comment_desc = $('#comment_desc').val();
+		let comment_id = $('#edit-comment-id').val();
+		let _token = $('meta[name="csrf-token"]').attr('content');
+		_token = document.getElementsByName("_token")[0].value
+		formData.append('_token', _token);
+		formData.append('textpost', comment_desc);
+		formData.append('comment_id', comment_id);
+		$.ajax({
+			url: "{{ url('/comment-update')}}",
+			type: "POST",
+			contentType: 'multipart/form-data',
+			cache: false,
+			contentType: false,
+			processData: false,
+			data: formData,
+			beforeSend: function() {
 
-	$('.comment-reply-form').on('submit', function(e) {
-		e.preventDefault();
-		let user_id = $(this).attr('user_id')
-		let newsfeed_id = $(this).attr('newsfeed_id')
-		let comment_id = $(this).attr('comment_id')
+			},
+			success: (response) => {
+				toastr.success(response.text);
+				if (response.status === "success") {
+					$("#commentModal").modal('hide');
+					$('.comment-text-' + comment_id).text(comment_desc);
+				}
+			},
+			error: function(data) {
+				console.log(data);
+			}
+		});
+	}
+
+	function CommentReplyForm($this) {
+		let user_id = $($this).attr('user_id')
+		let newsfeed_id = $($this).attr('newsfeed_id')
+		let comment_id = $($this).attr('comment_id')
 		let comment = $(".comment-reply-text-" + comment_id).val();
 
-		route = $(this).attr('route');
+		route = $($this).attr('route');
 		if (comment === "") {
 			$('.comment-reply-error-' + comment_id).text("This field is required.");
 		} else {
@@ -1233,16 +1107,54 @@
 				}
 			});
 		}
-	});
+	}
 
-	$('.comment-reply-child-form').on('submit', function(e) {
-		e.preventDefault();
-		let user_id = $(this).attr('user_id')
-		let newsfeed_id = $(this).attr('newsfeed_id')
-		let comment_id = $(this).attr('comment_id')
-		let reply_comment_id = $(this).attr('reply_comment_id')
+
+	function CommentReplyForm_2() {
+		
+		var formData = new FormData();
+		let reply_comment_description = $('#reply_comment_description').val();
+		let comment_id = $('#edit-comments-id').val();
+		let reply_comment_id = $('#edit-reply-comment-id').val();
+		let _token = $('meta[name="csrf-token"]').attr('content');
+		_token = document.getElementsByName("_token")[0].value
+		formData.append('_token', _token);
+		formData.append('textpost', reply_comment_description);
+		formData.append('comment_id', comment_id);
+		formData.append('reply_comment_id', reply_comment_id);
+
+		$.ajax({
+			url: "{{ url('/reply-comment-update')}}",
+			type: "POST",
+			contentType: 'multipart/form-data',
+			cache: false,
+			contentType: false,
+			processData: false,
+			data: formData,
+			beforeSend: function() {
+
+			},
+			success: (response) => {
+				toastr.success(response.text);
+				if (response.status === "success") {
+					$("#replyCommentModal").modal('hide');
+					$('.comment-reply-txt-' + reply_comment_id).text(reply_comment_description);
+				}
+			},
+			error: function(data) {
+				console.log(data);
+			}
+		});
+	}
+
+
+	function CommentReplyChildForm($this) {
+		let user_id = $($this).attr('user_id')
+		let newsfeed_id = $($this).attr('newsfeed_id')
+		let comment_id = $($this).attr('comment_id')
+		let reply_comment_id = $($this).attr('reply_comment_id')
 		let comment = $(".comment-reply-child-text-" + reply_comment_id).val();
-		route = $(this).attr('route');
+		route = $($this).attr('route');
 		if (comment === "") {
 			$('.comment-reply-child-error-' + reply_comment_id).text("This field is required.");
 		} else {
@@ -1274,13 +1186,12 @@
 				}
 			});
 		}
-	});
+	}
 
-	// Reply Comment Model-popup
-	$(document).on('click', '.edit-reply-comment', function() {
-		comment_id = $(this).attr('comment_id');
-		reply_comment_id = $(this).attr('reply_comment_id');
-		route = $(this).attr('route');
+	function editReplyComment($this) {
+		comment_id = $($this).attr('comment_id');
+		reply_comment_id = $($this).attr('reply_comment_id');
+		route = $($this).attr('route');
 
 		$.ajax({
 			url: route,
@@ -1299,39 +1210,12 @@
 				document.getElementById("edit-reply-comment-id").value = data.id;
 			}
 		})
-	})
+	}
 
-	// Delete comment Post
-	$(document).on('click', '.delete-reply-comment', function() {
-		comment_id = $(this).attr('comment_id');
-		reply_comment_id = $(this).attr('reply_comment_id');
-		toastr.options = {
-			"closeButton": true,
-			"newestOnTop": true,
-			"positionClass": "toast-top-right"
-		};
-		route = $(this).attr('route');
-		if (confirm("Are You Sure to delete this comment reply ?") == true) {
-			$.ajax({
-				url: route,
-				method: "GET",
-				data: {
-					"_token": "{{ csrf_token() }}",
-				},
-				beforeSend: function() {},
-				success: function(data) {
-					toastr.success(data.text);
-					if (data.status) {
-						document.getElementById("del-reply-comment_" + reply_comment_id).remove();
-					}
-				}
-			})
-		}
-	});
-	// View More Comments+
-	$(document).on('click', '.more-comments', function() {
-		newsfeed_id = $(this).attr('newsfeed_id');
-		route = $(this).attr('route');
+	function moreComments($this)
+	{
+		newsfeed_id = $($this).attr('newsfeed_id');
+		route = $($this).attr('route');
 		$.ajax({
 			url: route,
 			method: "GET",
@@ -1359,138 +1243,51 @@
 						var id = $(this).attr('id');
 						$(".crc_" + id).toggle();
 					});
-					// $('.comment-form').on('submit',function(e){
-					// 	e.preventDefault();
-					// 	let user_id = $(this).attr('user_id')
-					// 	let newsfeed_id = $(this).attr('newsfeed_id')
-					// 	let comment = $(".comment-text-"+newsfeed_id).val();
-					// 	route = $(this).attr('route');
-
-					// 	$.ajax({
-					// 		url: route,
-					// 		method:"POST",
-					// 		data:{
-					// 			"_token": "{{ csrf_token() }}",
-					// 			comment:comment,
-					// 			user_id:user_id,
-					// 			newsfeed_id:newsfeed_id,
-					// 		},
-					// 		success:function(response){
-					// 			_html = response.data;
-					// 			$('.comment_add_'+newsfeed_id).hide();
-					// 			$(".comments_list_"+newsfeed_id).hide();
-					// 			$(".hide-newsfeed_"+newsfeed_id).append(_html);
-					// 			$('.comment-reply-form').hide();
-					// 			console.log(response);
-					// 			$('.comment-text-'+newsfeed_id).val('');
-					// 			$(".comment_reply_btn").click(function(){
-					// 				var id =  $(this).attr('id');
-					// 				$(".cr_"+response.insertData.id).toggle();
-					// 			});
-					// 		},
-					// 		error: function(response) {
-					// 			$('.comment-error-'+newsfeed_id).text(response.responseJSON.errors.comment);
-					// 		}
-					// 	});
-					// });
+					 
 					$('.comment-reply-form').on('submit', function(e) {
 						console.log(4444444444444444444);
 						e.preventDefault();
-						let user_id = $(this).attr('user_id')
-						let newsfeed_id = $(this).attr('newsfeed_id');
-						let comment_id = $(this).attr('comment_id');
-						let comment = $("#comment-reply-text-" + comment_id).val();
-						route = $(this).attr('route');
-						if (comment === "") {
-							$('.comment-reply-error-' + comment_id).text("This field is required.");
-						} else {
-							$.ajax({
-								url: route,
-								method: "POST",
-								data: {
-									"_token": "{{ csrf_token() }}",
-									comment: comment,
-									user_id: user_id,
-									newsfeed_id: newsfeed_id,
-									comment_id: comment_id
-								},
-								success: function(response) {
-									$('.comment_reply_add_' + comment_id).hide();
-									$(".reply_comment_add_" + comment_id).html(response.data);
-									$('.comment-reply-child-form').hide();
-									$('.comment-reply-text-' + comment_id).val('');
-									$(".comment_reply_child_btn").click(function() {
-										var id = $(this).attr('id');
-										$(".crc_" + response.insertData.id).toggle();
-									});
-								},
-								error: function(response) {
-									$('.comment-reply-error-' + comment_id).text(response.responseJSON.errors.comment);
-								}
-							});
-						}
+						CommentReplyForm(this);
 					});
 					$('.comment-reply-child-form').on('submit', function(e) {
 						e.preventDefault();
-						let user_id = $(this).attr('user_id')
-						let newsfeed_id = $(this).attr('newsfeed_id')
-						let comment_id = $(this).attr('comment_id')
-						let reply_comment_id = $(this).attr('reply_comment_id')
-						let comment = $("#comment-reply-child-text-" + reply_comment_id).val();
-						route = $(this).attr('route');
-						if (comment === "") {
-							$('.comment-reply-child-error-' + reply_comment_id).text("This field is required.");
-						} else {
-							$.ajax({
-								url: route,
-								method: "POST",
-								data: {
-									"_token": "{{ csrf_token() }}",
-									comment: comment,
-									user_id: user_id,
-									newsfeed_id: newsfeed_id,
-									comment_id: comment_id
-								},
-								success: function(response) {
-									$('.comment_reply_child_add_' + reply_comment_id).hide();
-									$(".reply_comment_add_" + comment_id).html(response.data);
-									$('.comment-reply-child-form').hide();
-									$('.comment-reply-child-text-' + reply_comment_id).val('');
-									$(".comment_reply_child_btn").click(function() {
-										var id = $(this).attr('id');
-										$(".crc_" + response.insertData.id).toggle();
-									});
-								},
-								error: function(response) {
-									$('.comment-reply-child-error-' + reply_comment_id).text("This field is required.");
-								}
-							});
-						}
-					});
+						CommentReplyChildForm(this);
+				    });
+					 $('.facemocion').faceMocion({
+		emociones: [{
+				"emocion": "amo",
+				"TextoEmocion": "I love"
+			},
+			{
+				"emocion": "divierte",
+				"TextoEmocion": "I enjoy"
+			},
+			{
+				"emocion": "gusta",
+				"TextoEmocion": "I like"
+			},
+			{
+				"emocion": "asombro",
+				"TextoEmocion": "It amazes me"
+			},
+			{
+				"emocion": "alegre",
+				"TextoEmocion": "I am glad"
+			}
+		]
+	});
+
+ 
+
+
 				} else {
 					$('.view-more-comment-btn-' + newsfeed_id).html('No Comment Found.');
 				}
 			}
 		})
-	})
+	}
 
-	// Model Close
-	$(".close-newsfeed-model").click(function() {
-		$("#newsfeedModal").modal('hide');
-	});
-	$(".close-comment-model").click(function() {
-		$("#commentModal").modal('hide');
-	});
-
-	$(".close-reply-comment-model").click(function() {
-		$("#replyCommentModal").modal('hide');
-	});
-	$('.newsfeed_update_btn').click(function() {
-		$('.newsfeed_form').submit();
-	});
-	// Update Newsfeed
-	$('.newsfeed_form').on('submit', function(e) {
-		e.preventDefault();
+	function NewsfeedForm() {
 		var formData = new FormData();
 		let newsfeed_description = $('#newsfeed_description').val();
 		let my_file2 = $('#my_file2').prop('files');
@@ -1538,97 +1335,239 @@
 				console.log(data);
 			}
 		});
-	});
+	}
 
-	$('.comment_update_btn').on('click', function() {
-		$('.comment_form').submit();
-	});
-	// Update Comment
-	$('.comment_form').on('submit', function(e) {
-		e.preventDefault();
-		var formData = new FormData();
-		let comment_desc = $('#comment_desc').val();
-		let comment_id = $('#edit-comment-id').val();
-		let _token = $('meta[name="csrf-token"]').attr('content');
-		_token = document.getElementsByName("_token")[0].value
-		formData.append('_token', _token);
-		formData.append('textpost', comment_desc);
-		formData.append('comment_id', comment_id);
-		$.ajax({
-			url: "{{ url('/comment-update')}}",
-			type: "POST",
-			contentType: 'multipart/form-data',
-			cache: false,
-			contentType: false,
-			processData: false,
-			data: formData,
-			beforeSend: function() {
-
-			},
-			success: (response) => {
-				toastr.success(response.text);
-				if (response.status === "success") {
-					$("#commentModal").modal('hide');
-					$('.comment-text-' + comment_id).text(comment_desc);
+	function deleteReplyComment($this) {
+		comment_id = $($this).attr('comment_id');
+		reply_comment_id = $($this).attr('reply_comment_id');
+		toastr.options = {
+			"closeButton": true,
+			"newestOnTop": true,
+			"positionClass": "toast-top-right"
+		};
+		route = $($this).attr('route');
+		if (confirm("Are You Sure to delete this comment reply ?") == true) {
+			$.ajax({
+				url: route,
+				method: "GET",
+				data: {
+					"_token": "{{ csrf_token() }}",
+				},
+				beforeSend: function() {},
+				success: function(data) {
+					toastr.success(data.text);
+					if (data.status) {
+						document.getElementById("del-reply-comment_" + reply_comment_id).remove();
+					}
 				}
-			},
-			error: function(data) {
-				console.log(data);
-			}
-		});
-	});
-
-	// // Update Comment Reply
-	$('.comment_reply_form').on('submit', function(e) {
-		e.preventDefault();
-		var formData = new FormData();
-		let reply_comment_description = $('#reply_comment_description').val();
-		let comment_id = $('#edit-comments-id').val();
-		let reply_comment_id = $('#edit-reply-comment-id').val();
-		let _token = $('meta[name="csrf-token"]').attr('content');
-		_token = document.getElementsByName("_token")[0].value
-		formData.append('_token', _token);
-		formData.append('textpost', reply_comment_description);
-		formData.append('comment_id', comment_id);
-		formData.append('reply_comment_id', reply_comment_id);
-
-		$.ajax({
-			url: "{{ url('/reply-comment-update')}}",
-			type: "POST",
-			contentType: 'multipart/form-data',
-			cache: false,
-			contentType: false,
-			processData: false,
-			data: formData,
-			beforeSend: function() {
-
-			},
-			success: (response) => {
-				toastr.success(response.text);
-				if (response.status === "success") {
-					$("#replyCommentModal").modal('hide');
-					$('.comment-reply-txt-' + reply_comment_id).text(reply_comment_description);
-				}
-			},
-			error: function(data) {
-				console.log(data);
-			}
-		});
-	});
-	$('#my_file1').change(function() {
-		filePreview(this);
-	});
+			})
+		}
+	}
 
 	function filePreview(input) {
 		if (input.files && input.files[0]) {
 			var reader = new FileReader();
 			reader.onload = function(e) {
 				$('#post_upload_Form + embed').remove();
-				$('#post_upload_Form #preview_embed').html('<embed src="' + e.target.result + '" width="80" height="50">');
+				 $('#post_upload_Form #preview_embed').html('<embed src="' + e.target.result + '" width="80" height="50">');
 			};
 			reader.readAsDataURL(input.files[0]);
 		}
 	}
+
+	@if(Session::has('message'))
+	toastr.options = {
+		"closeButton": true,
+		"progressBar": true
+	}
+	toastr.success("{{ session('message') }}");
+	@endif
+ 
+function clickFunctionality() {
+	$('.comment-form').on('submit', function(e) {
+			e.preventDefault();
+			commentForm(this);
+		});
+
+		$(".image_upload1").unbind('click');
+		$(".image_upload1").click(function() {
+			$("input[id='my_file1']").click();
+		});
+
+		$(".image_upload2").unbind('click');
+		$(".image_upload2").click(function() {
+			$("input[id='my_file2']").click();
+		});
+
+		$(".image_upload3").unbind('click');
+		$(".image_upload3").click(function() {
+			$("input[id='my_file3']").click();
+		});
+
+		$('.comment-form').hide();
+
+		$(".comment_btn").unbind('click');
+		$(".comment_btn").click(function() {  
+			var id = $(this).attr('id');
+			$(".comment_add_" + id).toggle();
+		});
+
+		$('.comment-reply-form').hide();
+		$(".comment_reply_btn").unbind('click');
+		$(".comment_reply_btn").click(function() {
+			var id = $(this).attr('id');
+			$(".comment_reply_add_" + id).toggle();
+		});
+
+		$('.comment-reply-child-form').hide();
+		$(".comment_reply_child_btn").unbind('click');
+		$(".comment_reply_child_btn").click(function() {
+			var id = $(this).attr('id');
+			$(".comment_reply_child_add_" + id).toggle();
+		});
+
+		$(".postFollow").unbind('click');
+		$('.postFollow').on('click', function() {
+			postFollow(this);
+		});
+
+		$(document).off('click', '.likeCommentPost');
+		$(document).on('click', '.likeCommentPost', function() {
+			likeCommentPost(this);
+		});
+
+		$(document).off('click', '.likeReplyCommentPost');
+		$(document).on('click', '.likeReplyCommentPost', function() { 
+			likeReplyCommentPost(this); 
+		});
+}
+function reAddClickFunctions()
+{
+	$('.share-post-btn').on('click', function() { sharePost() });
+
+	$(document).off('click', '.likePost');
+	$(document).on('click', '.likePost', function() { likePost(this); });
+
+	// Block Newsfeed Post
+	$(document).off('click', '.block-newsfeed');
+	$(document).on('click', '.block-newsfeed', function() { 
+		blocknewsfeed(this);
+	});
+	// Block Newsfeed Post
+	$(document).off('click', '.unblock-newsfeed');
+	$(document).on('click', '.unblock-newsfeed', function() {
+		unblockNewsfeed(this);
+	});
+	// Delete Newsfeed Post
+	$(document).off('click', '.delete-newsfeed');
+	$(document).on('click', '.delete-newsfeed', function() {
+		deleteNewsfeed(this);
+	});
+
+	// Newsfeed Model-popup
+	$(document).off('click', '.edit-newsfeed');
+	$(document).on('click', '.edit-newsfeed', function() {
+		editNewsFeed(this);
+		
+	})
+
+	 // Update Comment
+	$('.comment_form').on('submit', function(e) {
+		e.preventDefault();
+		CommentForm_2();
+	});
+
+	// Add Friend
+	$(document).off('click', '.add-friend');
+	$(document).on('click', '.add-friend', function() {
+		addFriend(this);
+		
+	});
+	// Comment Model-popup
+	$(document).off('click', '.edit-comment');
+	$(document).on('click', '.edit-comment', function() {
+		editComment(this);
+		
+	})
+	// Delete comment Post
+	$(document).off('click', '.delete-comment');
+	$(document).on('click', '.delete-comment', function() {
+		deleteComment(this);
+	});
+
+	// Post Reply Comment
+
+	$(".comment-reply-form").unbind('click');
+	$('.comment-reply-form').on('submit', function(e) {
+		e.preventDefault();
+		CommentReplyForm(this);
+	});
+
+	$('.comment-reply-child-form').on('submit', function(e) {
+		e.preventDefault();
+		CommentReplyChildForm(this);
+	});
+
+	// Reply Comment Model-popup
+	$(document).off('click', '.edit-reply-comment');
+	$(document).on('click', '.edit-reply-comment', function() {
+		editReplyComment(this);
+	})
+
+	// Delete comment Post
+	$(document).off('click', '.delete-reply-comment');
+	$(document).on('click', '.delete-reply-comment', function() {
+		deleteReplyComment(this);
+	});
+	// View More Comments+
+	$(document).off('click', '.more-comments');
+	$(document).on('click', '.more-comments', function() {
+		moreComments(this);
+	});
+
+	// Model Close
+	$(".close-newsfeed-model").unbind('click');
+	$(".close-newsfeed-model").click(function() {
+		$("#newsfeedModal").modal('hide');
+	});
+
+	$(".close-comment-model").unbind('click');
+	$(".close-comment-model").click(function() {
+		$("#commentModal").modal('hide');
+	});
+
+	$(".close-reply-comment-model").unbind('click');
+	$(".close-reply-comment-model").click(function() {
+		$("#replyCommentModal").modal('hide');
+	});
+
+	$(".newsfeed_update_btn").unbind('click');
+	$('.newsfeed_update_btn').click(function() {
+		$('.newsfeed_form').submit();
+	});
+	// Update Newsfeed
+	$('.newsfeed_form').on('submit', function(e) {
+		e.preventDefault();
+		NewsfeedForm();
+	});
+
+	$(".comment_update_btn").unbind('click');
+	$('.comment_update_btn').on('click', function() {
+		$('.comment_form').submit();
+	});
+	
+
+	// // Update Comment Reply
+	$('.comment_reply_form').on('submit', function(e) {
+		e.preventDefault();
+        CommentReplyForm_2();
+	});
+
+	$('#my_file1').change(function() {
+		filePreview(this);
+	});
+
+	
 
 	$('.facemocion').faceMocion({
 		emociones: [{
@@ -1653,6 +1592,28 @@
 			}
 		]
 	});
+
+}
+
+
+$(document).ready(function() { clickFunctionality(); });
+reAddClickFunctions();	
+
+var page = 2;
+$(window).scroll(function() {
+   if($(window).scrollTop() + $(window).height() == $(document).height()) {
+	   if (page !== false) {
+       $.get( "{{ url('/load-more-newsfeed') }}?page=" + page, function( data ) { 
+	   		page++; 
+			jQuery('#newsfeedposts').append(data);
+		    reAddClickFunctions();
+			clickFunctionality();
+			if (data == '') { page = false; }
+		});
+	}
+   }
+});
+	
 </script>
 
 @endsection

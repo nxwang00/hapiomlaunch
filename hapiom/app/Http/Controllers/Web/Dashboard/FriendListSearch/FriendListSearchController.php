@@ -18,15 +18,16 @@ use App\Http\Requests\Web\Dashboard\Friend\UnFriendRequest;
 use App\Http\DataProviders\Web\Dashboard\Friend\FriendListDataProvider;
 use App\Http\Requests\Web\Dashboard\Friend\FriendlistUserRequest;
 use Illuminate\Http\Request;
+use App\Repositories\Users\FriendRepository;
 
 class FriendListSearchController extends Controller
 {
 
-    public function index(Request $request)
+    public function index(Request $request, FriendRepository $friendRepository)
     {
         $active = $request->active;
     	$friends = Friendlist::where('user_id', Auth::id())->where('friendstatus', 1)->get();
-        return view('dashboard.pages.freindlistsearch.index', compact('friends', 'active'));
+        return view('dashboard.pages.freindlistsearch.index', compact('friends', 'active', 'friendRepository'));
     }
 
     public function addFriend(SendFriendRequest $request, User $user)

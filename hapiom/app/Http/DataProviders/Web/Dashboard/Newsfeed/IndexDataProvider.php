@@ -32,7 +32,8 @@ class IndexDataProvider
 
     protected function data()
     {
-        if(isset($this->request->group_id) && !empty($this->request->group_id))
+         
+        /*if(isset($this->request->group_id) && !empty($this->request->group_id))
         {
             if(isset($this->request->newsfeed_id) && !empty($this->request->newsfeed_id))
             return $this->getEditdata();
@@ -53,11 +54,12 @@ class IndexDataProvider
             $users = User::select('id')->where('customer_id',Auth::user()->id)->pluck('id');
             $data = Newsfeed::select('*')->whereIn('user_id',$users)->orWhere('user_id',Auth::user()->id)->where('group_id',null)->orderBy('newsfeeds.id','desc')->paginate(config()->get('constants.NEWS_FEED_PER_PAGE_RECORD'));
         }
-        else {
+        else {*/
             if(isset($this->request->newsfeed_id) && !empty($this->request->newsfeed_id))
             return $this->getEditdata();
             $data = Newsfeed::select('*')->where('group_id',null)->orderBy('newsfeeds.id','desc')->paginate(config()->get('constants.NEWS_FEED_PER_PAGE_RECORD'));
-        }
+        //}
+         
         return $data;
     }
 
