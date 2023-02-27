@@ -7,7 +7,7 @@ use App\Models\Friendrequest;
 use App\Models\User;
 use Auth;
 use DB;
- 
+
 class FriendRepository  implements FriendRepositoryInterface
 {
     public function friendSuggestions($limit) {
@@ -16,11 +16,15 @@ class FriendRepository  implements FriendRepositoryInterface
         $requsetFriend = Friendrequest::where('request_from', Auth::user()->id)->pluck('request_to');
         $sendRequset = Friendrequest::where('request_to', Auth::user()->id)->pluck('request_from');
         $requestedAndFrinedsId = array_merge($friends_id->toArray(), $requsetFriend->toArray(), $sendRequset->toArray());
-       
+
         $possible_friends = $this->getUsersByPriority($requestedAndFrinedsId, $limit);
-        
-        $query = 'SELECT a.*, b.profile_image FROM users as a LEFT JOIN userinfos b ON a.id = b.user_id WHERE a.id IN ('.implode(',', $possible_friends).') ORDER BY FIELD(a.id, '.implode(',', $possible_friends).') LIMIT '.$limit;
-       
+
+        if ($possible_friends == 0) {
+            $query = 'SELECT a.*, b.profile_image FROM users as a LEFT JOIN userinfos b ON a.id = b.user_id LIMIT '.$limit;
+        }
+        else {
+            $query = 'SELECT a.*, b.profile_image FROM users as a LEFT JOIN userinfos b ON a.id = b.user_id WHERE a.id IN ('.implode(',', $possible_friends).') ORDER BY FIELD(a.id, '.implode(',', $possible_friends).') LIMIT '.$limit;
+        }
         return $users = DB::select(DB::raw($query));
     }
 
@@ -41,11 +45,11 @@ class FriendRepository  implements FriendRepositoryInterface
 
         $query = '('.$query_1.') UNION ('.$query_2.') UNION '.$query_3;
         $users = DB::select(DB::raw($query), ['somevariable' => Auth::user()->id, 'somevariable2' => Auth::user()->id, 'somevariable3' => Auth::user()->id, 'somevariable4' => Auth::user()->id]);
-        
+
         $users = array_map(function ($value) {
             return $value->user_id;
         }, $users);
-        
+
         return $users;
     }
 
@@ -82,12 +86,12 @@ class FriendRepository  implements FriendRepositoryInterface
         return User::whereIn('id', $users)->get()->toArray();
     }
 
-    public function userFriendsCount($id) 
+    public function userFriendsCount($id)
     {
-        
+
         $query = "SELECT id FROM users WHERE id IN ((SELECT user_id FROM friendlists WHERE friend_id = :somevariable)) AND status = 1";
         $users = DB::select(DB::raw($query), ['somevariable' => $id]);
         echo count($users);
     }
-        
+
 }

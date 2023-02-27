@@ -427,7 +427,11 @@
             }
         }
 		function selectChatUser(chatUserId) {
-			let newChat = `<div class="chat-block" id="`+ chatUserId +`">
+
+            if($("#chatopaque").length == 0) {
+                jQuery('body').append('<div class="modal-backdrop fade show" id="chatopaque"></div>');
+            }
+            let newChat = `<div class="chat-block" id="`+ chatUserId +`">
                 <div class="chat-head" style="background-color: green;">
                     <header class="d-flex justify-content-between align-items-center bg-white pt-3 pl-3 pr-3 pb-3">
                         <div class="d-flex align-items-center">
@@ -463,6 +467,9 @@
             }
             $('#closeChatBtn' + chatUserId).on('click', function() {
                 $('#chat-msg').find('#' + chatUserId).remove();
+                if (jQuery('.chat-block').length == 0) {
+                    jQuery('body').find('#chatopaque').remove();
+                }
             });
 			// remove the badge for unread message number
 			$("#unreads_"+chatUserId).css('display', 'none');

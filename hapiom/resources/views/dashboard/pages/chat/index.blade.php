@@ -16,7 +16,7 @@
 								<div class="col-lg-3 chat-data-left scroller">
 									<div class="chat-search pt-3 pl-3">
 										<div class="d-flex align-items-center">
-											<div class="chat-profile mr-3">
+											<div class="mr-3">
 												@if (isset(Auth::user()->userInfo->profile_image))
 												<img src="{{ url('images/profile/' . Auth::user()->userInfo->profile_image) }}" alt="chat-user" class="avatar-60 ">
 												@else
@@ -326,6 +326,7 @@
 	})
 
 	function selectChatUser(chatUserId) {
+
 		$("#default-block").removeClass('active show');
 		$("#chat-block").addClass('active show');
 		// remove the badge for unread message number

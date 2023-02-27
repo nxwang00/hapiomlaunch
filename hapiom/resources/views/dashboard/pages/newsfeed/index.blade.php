@@ -42,7 +42,7 @@
 												<h5 class="mb-0 line-height">{{ ucwords(Auth::user()->name) }}</h5>
 											</div>
 										</div>
-										<input type="text" class="form-control mt-3" name="textpost" placeholder="What's on your mind?" style="border-radius:20px;">
+										<input onkeyup="enableDisablePost()" id="mainpost" type="text" class="form-control mt-3" name="textpost" placeholder="What's on your mind?" style="border-radius:20px;">
 
 										<input type="hidden" name="group_id" value="{{ @$group_id }}">
 										<hr>
@@ -60,7 +60,7 @@
 
 											</div>
 										</div>
-										<button type="submit" class="btn btn-primary d-block w-100 mt-3">Post</button>
+										<button id="post_submit" type="submit" class="btn btn-primary d-block w-100 mt-3" disabled>Post</button>
 									</div>
 								</form>
 							</div>
@@ -268,6 +268,11 @@
 												<span class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="button">
 													{{ $result->NewsfeedComment->count() }} Comment
 												</span>
+												<div class="dropdown-menu" @if($result->NewsfeedComment->count() == 0) style="background: #fff; border: 0 none;" @endif>
+                                                                        @foreach($result->NewsfeedComment as $key => $comment)
+                                                                        <a class="dropdown-item" href="#">{{ ucwords($comment->NewsfeedUser->name) }}</a>
+                                                                        @endforeach
+                                                                    </div>
 											</div>
 										</div>
 									</div>
@@ -286,7 +291,7 @@
 									<li class="mb-2 reply_comment_add_{{ $comment->id }}" id="comment-el-{{ $comment->id }}">
 										<div class="d-flex flex-wrap justify-content-start">
 											<div class="user-img">
-												@if(isset($comment->profileImage->profile_image) && file_exists('images/profile'. $comment->profileImage->profile_image))
+												@if(isset($comment->profileImage->profile_image)  )
 												<img src="{{ url('images/profile',$comment->profileImage->profile_image) }}" alt="userimg" class="avatar-35 rounded-circle img-fluid">
 												@else
 												<img src="{{url('assets/dashboard/img/default-avatar.png')}}" alt="userimg" class="avatar-35 rounded-circle img-fluid">
@@ -294,6 +299,9 @@
 											</div>
 											<div class="comment-data-block ml-3">
 												<h6>{{ ucwords($comment->NewsfeedUser->name) }}</h6>
+												@if (isset($comment->CommentImage->image))
+												<img src="{{ url('images/comments', $comment->CommentImage->image) }}" alt="image Comment" style="max-width: 300px; max-height: 300px;">
+												@endif
 												<p class="mb-0 comment-text-{{ $comment->id }}">{{ ucwords($comment->comment) }}</p>
 												<div class="d-flex flex-wrap align-items-center comment-activity">
 <!------------------------------------------------->
@@ -381,10 +389,25 @@
 									@endforeach
 								</ul>
 								<form class="comment-text align-items-center mt-3 comment-form comment_add_{{$result->id}}" route="{{ route('comment_add')}}" user_id="{{ Auth::user()->id }}" newsfeed_id="{{ $result->id }}" id="">
-									<div class="comment-box comment-text-{{ $result->id }}" id="" contentEditable="true" name="comment" onkeydown="doComment(event, {{ $result->id }})"></div>
+									<!--<div class="comment-box comment-text-{{ $result->id }}" id="" contentEditable="true"  name="comment" onkeydown="doComment(event, {{ $result->id }})"> <div class="comment-attagement d-flex" style)>-->
+                                                           <!-- <a href="javascript:void();"><i class="ri-link mr-3"></i></a>
+                                                            <a href="javascript:void();"><i class="ri-user-smile-line mr-3"></i></a> 
+                                                            <a href="javascript:void();"><i class="ri-camera-line mr-3"></i></a>
+                                                        </div></div>
 									<!-- <button class="badge badge-primary mt-2" id="submit" type="submit">Post</button>
 									<button class="badge badge-secondary mt-2 ml-2 comment_btn" id="{{$result->id}}">Cancel</button> -->
+
+									<input type="text" class="form-control rounded comment-text-{{ $result->id }}" onkeydown="doComment(event, {{ $result->id }})" />
+									<input class="d-none" id="comment_file_{{ $result->id }}" type="file" name="image" />
+                                                        <div class="comment-attagement d-flex">
+                                                            <!-- <a href="javascript:void();"><i class="ri-link mr-3"></i></a>
+                                                            <a href="javascript:void();"><i class="ri-user-smile-line mr-3"></i></a> -->
+                                                            <a href="javascript:void();" onClick="commentPicture({{ $result->id }})"><i class="ri-camera-line mr-3"></i></a>
+                                                        </div>
+
 								</form>
+
+								 
 							</div>
 							<?php
 							if ($result->NewsfeedComment->count() >= 2) {
@@ -420,7 +443,7 @@
 								</a>
 								@else
 								<a href="{{ route('user-profile',encrypt($value->id)) }}">
-									<img src="{{url('assets/dashboard/img/default-avatar.png')}}" class="rounded-circle img-fluid mr-3" alt="user">
+									<img src="{{url('assets/dashboard/img/default-avatar.png')}}" class="rounded-circle img-fluid" alt="user">
 								</a>
 								@endif
 								<div class="stories-data ml-3">
@@ -596,7 +619,7 @@
 				</div>
 			</div>
 			<div class="col-sm-12 text-center">
-				<img src="{{ url('assets/dashboard/images/page-img/page-load-loader.gif') }}" alt="loader" style="height: 100px;">
+				<img id="page_load_loader" src="{{ url('assets/dashboard/images/page-img/page-load-loader.gif') }}" alt="loader" style="height: 100px; display: none;">
 			</div>
 		</div>
 	</div>
@@ -676,6 +699,17 @@
 		$('.share-post-btn').attr('href', mailtoURL);
 	}
 
+	function enableDisablePost() {
+		var preview_embed = jQuery('#preview_embed').html();
+		var inputText = jQuery('#mainpost').val();
+		if (preview_embed.trim() != '' || inputText.trim() != '') {
+        	jQuery('#post_submit').prop("disabled", false); 
+	    }
+		else {
+			jQuery('#post_submit').prop("disabled", true); 
+		}
+	}
+    
 	function likePost($this) {  
 		newsfeed_id = $($this).attr('newsfeed_id');
 			user_id = $($this).attr('user_id');
@@ -891,15 +925,117 @@
 
 	// Post Comment
 	function doComment(event, newsfeed_id) {
+		
 		if (event.keyCode == 13) {
-			let comment = $('.comment-text-' + newsfeed_id).text();
-			if (!event.shiftKey && comment) {
-				$('.comment_add_' + newsfeed_id).submit();
-				event.stopPropagation();
-			}
-		}
+			event.preventDefault();
+			let comment = $('.comment-text-' + newsfeed_id).val();
+			//alert(comment);
+		    var fd = new FormData();
+		    var files = jQuery('#comment_file_' + newsfeed_id)[0].files;
+			fd.append('comment_file',files[0]);
+			fd.append('newsfeed_id', newsfeed_id);
+			fd.append('comment', comment);
+			 
+			jQuery.ajax({
+				url: '{{ route('comment_add')}}',
+				type: 'post',
+				headers: {'X-CSRF-TOKEN': '{{csrf_token()}}' },
+				data: fd,
+				contentType: false,
+				processData: false,
+				success: function(response){ 
+					//a/lert(response.upload_error);
+					jQuery('.hide-newsfeed_' + newsfeed_id).prepend(response.comment);
+					jQuery('.comment_add_' + newsfeed_id).html('<input type="text" class="form-control rounded comment-text-'+newsfeed_id+'" onkeydown="doComment(event, '+newsfeed_id+')" /> \
+									<input class="d-none" id="comment_file_'+newsfeed_id+'" type="file" name="image" /> \
+                                                        <div class="comment-attagement d-flex"> \
+                                                            <!-- <a href="javascript:void();"><i class="ri-link mr-3"></i></a> \
+                                                            <a href="javascript:void();"><i class="ri-user-smile-line mr-3"></i></a> --> \
+                                                            <a href="javascript:void();" onClick="commentPicture('+newsfeed_id+')"><i class="ri-camera-line mr-3"></i></a> \
+                                                        </div>'); 
 
+														//_html = data;
+					//$('.view-more-comment-btn-' + newsfeed_id).hide();
+					$(".comments_list_" + newsfeed_id).hide();
+					
+					$('.comment-reply-form').hide();
+		            $(".comment_reply_btn").unbind('click');
+		 
+					
+					$(".comment_reply_btn").click(function() {
+						var id = $(this).attr('id');
+					    $(".cr_" + id).toggle();
+					});
+
+					$(".comment_reply_btn").click(function() {
+						var id = $(this).attr('id');
+					    $(".comment_reply_add_" + id).toggle();
+					});
+
+					
+
+					$(".comment_reply_child_btn").click(function() {
+						var id = $(this).attr('id');
+						$(".crc_" + id).toggle();
+					});
+					 
+					$('.comment-reply-form').on('submit', function(e) {
+						//console.log(4444444444444444444);
+						e.preventDefault();
+						CommentReplyForm(this);
+					});
+					$('.comment-reply-child-form').on('submit', function(e) {
+						e.preventDefault();
+						CommentReplyChildForm(this);
+				    });
+					 $('.facemocion').faceMocion({
+		emociones: [{
+				"emocion": "amo",
+				"TextoEmocion": "I love"
+			},
+			{
+				"emocion": "divierte",
+				"TextoEmocion": "I enjoy"
+			},
+			{
+				"emocion": "gusta",
+				"TextoEmocion": "I like"
+			},
+			{
+				"emocion": "asombro",
+				"TextoEmocion": "It amazes me"
+			},
+			{
+				"emocion": "alegre",
+				"TextoEmocion": "I am glad"
+			}
+		]
+	});
+
+				}
+			});
+    }
+
+	
+/*
+    jQuery.post(theURL, { price_id: priceId, planId: planId, _token: "{{ csrf_token() }}" })
+        .done(function( data ) { 
+          
+
+          stripe
+        .redirectToCheckout({
+          sessionId: data
+        })
+        .then(handleResult);
+        
+        });
+
+		*/
 	}
+
+	function commentPicture(newsfeed_id) {
+		jQuery('#comment_file_' + newsfeed_id).click();
+    }
 
 	function editNewsFeed($this) {
 		newsfeed_id = $($this).attr('newsfeed_id');
@@ -1235,10 +1371,22 @@
 					// $('.comment-form').hide();
 					// $('.comment-reply-form').hide();
 					// $('.comment-reply-child-form').hide();
+					
+					$('.comment-reply-form').hide();
+					$(".comment_reply_btn").unbind('click');
+
 					$(".comment_reply_btn").click(function() {
 						var id = $(this).attr('id');
 						$(".cr_" + id).toggle();
 					});
+
+				    $(".comment_reply_btn").click(function() {
+						var id = $(this).attr('id');
+						$(".comment_reply_add_" + id).toggle();
+					});
+
+
+
 					$(".comment_reply_child_btn").click(function() {
 						var id = $(this).attr('id');
 						$(".crc_" + id).toggle();
@@ -1370,6 +1518,7 @@
 			reader.onload = function(e) {
 				$('#post_upload_Form + embed').remove();
 				 $('#post_upload_Form #preview_embed').html('<embed src="' + e.target.result + '" width="80" height="50">');
+				 enableDisablePost();
 			};
 			reader.readAsDataURL(input.files[0]);
 		}
@@ -1416,6 +1565,7 @@ function clickFunctionality() {
 		$(".comment_reply_btn").unbind('click');
 		$(".comment_reply_btn").click(function() {
 			var id = $(this).attr('id');
+		 
 			$(".comment_reply_add_" + id).toggle();
 		});
 
@@ -1603,12 +1753,13 @@ var page = 2;
 $(window).scroll(function() {
    if($(window).scrollTop() + $(window).height() == $(document).height()) {
 	   if (page !== false) {
+	   jQuery('#page_load_loader').fadeIn();
        $.get( "{{ url('/load-more-newsfeed') }}?page=" + page, function( data ) { 
 	   		page++; 
 			jQuery('#newsfeedposts').append(data);
 		    reAddClickFunctions();
 			clickFunctionality();
-			if (data == '') { page = false; }
+			if (data == '') { page = false; jQuery('#page_load_loader').fadeOut(); }
 		});
 	}
    }

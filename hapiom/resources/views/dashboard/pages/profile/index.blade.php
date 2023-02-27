@@ -306,7 +306,7 @@
 												<h5 class="mb-0 line-height">{{ ucwords(Auth::user()->name) }}</h5>
 											</div>
 										</div>
-										<input type="text" class="form-control mt-3" name="textpost" placeholder="What's on your mind?" style="border-radius:20px;">
+										<input onkeyup="enableDisablePost()" id="mainpost" type="text" class="form-control mt-3" name="textpost" placeholder="What's on your mind?" style="border-radius:20px;">
 
 										<input type="hidden" name="group_id" value="{{ @$group_id }}">
 										<hr>
@@ -324,7 +324,7 @@
 
 											</div>
 										</div>
-										<button type="submit" class="btn btn-primary d-block w-100 mt-3">Post</button>
+										<button id="post_submit" type="submit" class="btn btn-primary d-block w-100 mt-3" disabled>Post</button>
 									</div>
 								</form>
 @endif
@@ -438,9 +438,9 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="iq-card">
+                                    <div>
                                    
-                                        <div class="iq-card-body">
+                                        <div >
                                         <div id="newsfeedposts">
                                             @if($profilePosts->count() > 0)
 
@@ -450,8 +450,8 @@
                                             @endphp
 
                                             @foreach($profilePosts as $profilePost)
-                                            <div class="post-item">
-                                                <div class="user-post-data p-3">
+                                            <div class="iq-card iq-card-block iq-card-stretch iq-card-height">
+                                                <div class="user-post-data  iq-card-body">
                                                     <div class="d-flex flex-wrap">
                                                         <div class="media-support-user-img mr-3">
                                                             @if(isset($user->userInfo->profile_image) && file_exists('images/profile/' . $user->userInfo->profile_image))
@@ -522,7 +522,7 @@
                                                     </div>
                                                 </div>
                                                 @if(isset($profilePost->text) && !empty($profilePost->text))
-                                                <div class="user-post">
+                                                <div class="user-post iq-card-body">
                                                     <p>{{ $profilePost->text }}</p>
                                                 </div>
                                                 @endif
@@ -534,7 +534,7 @@
                                                 </div>
                                                 @endif
 
-                                                <div class="comment-area mt-3">
+                                                <div class="comment-area iq-card-body">
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <div class="like-block position-relative d-flex align-items-center">
                                                             <div class="d-flex align-items-center">
@@ -604,7 +604,7 @@
                                                                     <span class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="button">
                                                                         {{ $profilePost->NewsfeedComment->count() }} Comment
                                                                     </span>
-                                                                    <div class="dropdown-menu">
+                                                                    <div class="dropdown-menu" @if($profilePost->NewsfeedComment->count() == 0) style="background: #fff; border: 0 none;" @endif>
                                                                         @foreach($profilePost->NewsfeedComment as $key => $comment)
                                                                         <a class="dropdown-item" href="#">{{ ucwords($comment->NewsfeedUser->name) }}</a>
                                                                         @endforeach
@@ -632,10 +632,10 @@
   @if ($key == 1)
   @break
   @endif
-  <li class="mb-2 reply_comment_add_{{ $comment->id }}" id="comment-el-{{ $comment->id }}">
+  <li class="mb-2 reply_comment_add_{{ $comment->id }}" id="comment-el-{{ $comment->id }}" >
     <div class="d-flex flex-wrap justify-content-start">
       <div class="user-img">
-        @if(isset($comment->profileImage->profile_image) && file_exists('images/profile'. $comment->profileImage->profile_image))
+        @if(isset($comment->profileImage->profile_image)  )
         <img src="{{ url('images/profile',$comment->profileImage->profile_image) }}" alt="userimg" class="avatar-35 rounded-circle img-fluid">
         @else
         <img src="{{url('assets/dashboard/img/default-avatar.png')}}" alt="userimg" class="avatar-35 rounded-circle img-fluid">
@@ -643,6 +643,9 @@
       </div>
       <div class="comment-data-block ml-3">
         <h6>{{ ucwords($comment->NewsfeedUser->name) }}</h6>
+        @if (isset($comment->CommentImage->image))
+	    <img src="{{ url('images/comments', $comment->CommentImage->image) }}" alt="image Comment" style="max-width: 300px; max-height: 300px;">
+		@endif
         <p class="mb-0 comment-text-{{ $comment->id }}">{{ ucwords($comment->comment) }}</p>
         <div class="d-flex flex-wrap align-items-center comment-activity">
             <!------------------------------------------------->
@@ -674,28 +677,29 @@
 
 													</span>
 												</div>
-		<!------------------------------------------------->	
-          <a href="javascript:void();" class="likeCommentPost" comment_id="{{ $comment->id }}" newsfeed_id="{{ $profilePost->id }}" route="{{ route('newsfeed-comment-like')}}" users_id="{{ Auth::user()->id }}"><span id="" class="total_comment_like_count_{{ $comment->id }}">{{ $comment->NewsfeedcommentLike ? $comment->NewsfeedcommentLike->count() : "0"  }}</span> like</a>
-          <a href="javascript:void();" class="reply comment_reply_btn" id="{{ $comment->id}}">reply</a>
-          <a href="javascript:void();">translate</a>
-          <span> {{ newsfeeddateformate($comment->created_at) }}</span>
-        </div>
-        <!-- Reply Comment Form  -->
+		<!------------------------------------------------->										
 
-        <form class="comment-text align-items-center mt-3 comment-reply-form comment_reply_add_{{$comment->id}}" route="{{ route('comment_reply_add')}}" user_id="{{ Auth::user()->id }}" newsfeed_id="{{ $profilePost->id }}" comment_id="{{$comment->id}}" id="">
-          <textarea class="form-control rounded comment-reply-text-{{ $comment->id }}" id="" name="comment" placeholder="" required></textarea>
+        <a href="javascript:void();" class="likeCommentPost" comment_id="{{ $comment->id }}" newsfeed_id="{{ $profilePost->id  }}" route="{{ route('newsfeed-comment-like')}}" users_id="{{ Auth::user()->id }}"><span id="" class="total_comment_like_count_{{ $comment->id }}">{{ $comment->NewsfeedcommentLike ? $comment->NewsfeedcommentLike->count() : "0"  }}</span> like</a>
+													<a href="javascript:void();" class="reply comment_reply_btn" id="{{ $comment->id}}">reply</a>
+													<a href="javascript:void();">translate</a>
+													<span> {{ newsfeeddateformate($comment->created_at) }}</span>
+												</div>
+												<!-- Reply Comment Form  -->
 
-          <button class="badge badge-primary mt-2" id="submit" type="submit">Post</button>
-          <button class="badge badge-secondary mt-2 ml-2 comment_reply_btn" id="{{$comment->id}}">Cancel</button>
+												<form class="comment-text align-items-center mt-3 comment-reply-form comment_reply_add_{{$comment->id}}" route="{{ route('comment_reply_add')}}" user_id="{{ Auth::user()->id }}" newsfeed_id="{{ $profilePost->id }}" comment_id="{{$comment->id}}" id="">
+													<textarea class="form-control rounded comment-reply-text-{{ $comment->id }}" id="" name="comment" placeholder="" required></textarea>
 
-        </form>
-        <!-- ... end Reply Comment Form  -->
+													<button class="badge badge-primary mt-2" id="submit" type="submit">Post</button>
+													<button class="badge badge-secondary mt-2 ml-2 comment_reply_btn" id="{{$comment->id}}">Cancel</button>
+
+												</form>
+												<!-- ... end Reply Comment Form  -->
       </div>
       @if ($comment->user_id === Auth::user()->id)
       <div class="iq-card-post-toolbar d-inline-block">
         <div class="dropdown">
           <span class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="button">
-            <i class="ri-more-fill"></i>
+            <i class="ri-more-fill"></i> 
           </span>
           <div class="dropdown-menu m-0 p-0">
             <a class="dropdown-item p-3 edit-comment" href="javascript:void();" route="{{ route('edit-comment')}}" comment_id="{{ $comment->id }}" data-toggle="modal" data-target="#commentModal">
@@ -728,11 +732,23 @@
   </li>
   @endforeach
 </ul>
+
+
+ 
 <form class="comment-text align-items-center mt-3 comment-form comment_add_{{$profilePost->id}}" route="{{ route('comment_add')}}" user_id="{{ Auth::user()->id }}" newsfeed_id="{{ $profilePost->id }}" id="">
-  <div class="comment-box comment-text-{{ $profilePost->id }}" id="" contentEditable="true" name="comment" onkeydown="doComment(event, {{ $profilePost->id }})"></div>
-  <!-- <button class="badge badge-primary mt-2" id="submit" type="submit">Post</button>
-  <button class="badge badge-secondary mt-2 ml-2 comment_btn" id="{{$profilePost->id}}">Cancel</button> -->
-</form>
+								 
+
+									<input type="text" class="form-control rounded comment-text-{{ $profilePost->id }}" onkeydown="doComment(event, {{ $profilePost->id }})" />
+									<input class="d-none" id="comment_file_{{ $profilePost->id }}" type="file" name="image" />
+                                                        <div class="comment-attagement d-flex">
+                                                            <!-- <a href="javascript:void();"><i class="ri-link mr-3"></i></a>
+                                                            <a href="javascript:void();"><i class="ri-user-smile-line mr-3"></i></a> -->
+                                                            <a href="javascript:void();" onClick="commentPicture({{ $profilePost->id }})"><i class="ri-camera-line mr-3"></i></a>
+                                                        </div>
+
+								</form>
+
+
 <?php
 if ($profilePost->NewsfeedComment->count() >= 2) {
   $view_more = 'View ' . $profilePost->NewsfeedComment->count() - 1 . ' more comments +';
@@ -1031,7 +1047,7 @@ if ($profilePost->NewsfeedComment->count() >= 2) {
                 </div>
             </div>
             <div class="col-sm-12 text-center">
-                <img src="{{ url('assets/dashboard/images/page-img/page-load-loader.gif') }}" alt="loader" style="height: 100px;">
+                <img id="page_load_loader" src="{{ url('assets/dashboard/images/page-img/page-load-loader.gif') }}" alt="loader" style="display: none; height: 100px;">
             </div>
         </div>
     </div>
@@ -1269,12 +1285,50 @@ if ($profilePost->NewsfeedComment->count() >= 2) {
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="commentModal" tabindex="-1" role="dialog" aria-labelledby="commentModalLabel" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="commentModalLabel">Edit Comment</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<form class="comment_form">
+					<div class="form-group">
+						<label for="comment_desc" class="col-form-label">Comment:</label>
+						<textarea type="text" class="form-control" id="comment_desc"></textarea>
+						<input type="hidden" class="form-control" id="edit-comment-id">
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-primary comment_update_btn">Submit</button>
+			</div>
+		</div>
+	</div>
+</div>
 @endsection
 @section('page-js-link')
 @endsection
 
 @section('page-js')
 <script type="text/javascript">
+
+
+function enableDisablePost() {
+	var preview_embed = jQuery('#preview_embed').html();
+	var inputText = jQuery('#mainpost').val();
+    if (preview_embed.trim() != '' || inputText.trim() != '') {
+        jQuery('#post_submit').prop("disabled", false); 
+	}
+    else {
+		jQuery('#post_submit').prop("disabled", true); 
+	}
+}
 
 function blockFriend($this)
 {
@@ -1407,80 +1461,92 @@ function likePost($this) {
 			})
         }
 
-function moreComments($this)
-{
-    newsfeed_id = $($this).attr('newsfeed_id');
-    route = $($this).attr('route');
-    $.ajax({
-        url: route,
-        method: "GET",
-        data: {
-            "_token": "{{ csrf_token() }}",
-            "newsfeed_id": newsfeed_id,
-        },
-        beforeSend: function() {
-            $('.view-more-comment-btn-' + newsfeed_id).html('Loading...');
-        },
-        success: function(data) {
-            if (data.length > 0) {
-                _html = data;
-                $('.view-more-comment-btn-' + newsfeed_id).hide();
-                $(".comments_list_" + newsfeed_id).hide();
-                $(".hide-newsfeed_" + newsfeed_id).html(data);
-                // $('.comment-form').hide();
-                // $('.comment-reply-form').hide();
-                // $('.comment-reply-child-form').hide();
-                $(".comment_reply_btn").click(function() {
-                    var id = $(this).attr('id');
-                    $(".cr_" + id).toggle();
-                });
-                $(".comment_reply_child_btn").click(function() {
-                    var id = $(this).attr('id');
-                    $(".crc_" + id).toggle();
-                });
-                    
-                $('.comment-reply-form').on('submit', function(e) {
-                    console.log(4444444444444444444);
-                    e.preventDefault();
-                    CommentReplyForm(this);
-                });
-                $('.comment-reply-child-form').on('submit', function(e) {
-                    e.preventDefault();
-                    CommentReplyChildForm(this);
-                });
-                    $('.facemocion').faceMocion({
-    emociones: [{
-            "emocion": "amo",
-            "TextoEmocion": "I love"
-        },
-        {
-            "emocion": "divierte",
-            "TextoEmocion": "I enjoy"
-        },
-        {
-            "emocion": "gusta",
-            "TextoEmocion": "I like"
-        },
-        {
-            "emocion": "asombro",
-            "TextoEmocion": "It amazes me"
-        },
-        {
-            "emocion": "alegre",
-            "TextoEmocion": "I am glad"
-        }
-    ]
-});
+        function moreComments($this)
+	{
+		newsfeed_id = $($this).attr('newsfeed_id');
+		route = $($this).attr('route');
+		$.ajax({
+			url: route,
+			method: "GET",
+			data: {
+				"_token": "{{ csrf_token() }}",
+				"newsfeed_id": newsfeed_id,
+			},
+			beforeSend: function() {
+				$('.view-more-comment-btn-' + newsfeed_id).html('Loading...');
+			},
+			success: function(data) {
+				if (data.length > 0) {
+					_html = data;
+					$('.view-more-comment-btn-' + newsfeed_id).hide();
+					$(".comments_list_" + newsfeed_id).hide();
+					$(".hide-newsfeed_" + newsfeed_id).html(data);
+					// $('.comment-form').hide();
+					// $('.comment-reply-form').hide();
+					// $('.comment-reply-child-form').hide();
+					
+					$('.comment-reply-form').hide();
+					$(".comment_reply_btn").unbind('click');
+
+					$(".comment_reply_btn").click(function() {
+						var id = $(this).attr('id');
+						$(".cr_" + id).toggle();
+					});
+
+				    $(".comment_reply_btn").click(function() {
+						var id = $(this).attr('id');
+						$(".comment_reply_add_" + id).toggle();
+					});
 
 
 
+					$(".comment_reply_child_btn").click(function() {
+						var id = $(this).attr('id');
+						$(".crc_" + id).toggle();
+					});
+					 
+					$('.comment-reply-form').on('submit', function(e) {
+						console.log(4444444444444444444);
+						e.preventDefault();
+						CommentReplyForm(this);
+					});
+					$('.comment-reply-child-form').on('submit', function(e) {
+						e.preventDefault();
+						CommentReplyChildForm(this);
+				    });
+					 $('.facemocion').faceMocion({
+		emociones: [{
+				"emocion": "amo",
+				"TextoEmocion": "I love"
+			},
+			{
+				"emocion": "divierte",
+				"TextoEmocion": "I enjoy"
+			},
+			{
+				"emocion": "gusta",
+				"TextoEmocion": "I like"
+			},
+			{
+				"emocion": "asombro",
+				"TextoEmocion": "It amazes me"
+			},
+			{
+				"emocion": "alegre",
+				"TextoEmocion": "I am glad"
+			}
+		]
+	});
 
-            } else {
-                $('.view-more-comment-btn-' + newsfeed_id).html('No Comment Found.');
-            }
-        }
-    })
-}
+ 
+
+
+				} else {
+					$('.view-more-comment-btn-' + newsfeed_id).html('No Comment Found.');
+				}
+			}
+		})
+	}
 
 function unFriend($this) {
         toastr.options = {
@@ -1873,16 +1939,105 @@ function sharePost() {
 
     // Post Comment
 	function doComment(event, newsfeed_id) {
+       
 		if (event.keyCode == 13) {
-			let comment = $('.comment-text-' + newsfeed_id).text();
-			if (!event.shiftKey && comment) {
-				$('.comment_add_' + newsfeed_id).submit();
-				event.stopPropagation();
+            event.preventDefault();
+			let comment = $('.comment-text-' + newsfeed_id).val();
+			 
+			
+
+			 
+
+			var fd = new FormData();
+		    var files = jQuery('#comment_file_' + newsfeed_id)[0].files;
+			fd.append('comment_file',files[0]);
+			fd.append('newsfeed_id', newsfeed_id);
+			fd.append('comment', comment);
+			 
+			jQuery.ajax({
+				url: '{{ route('comment_add')}}',
+				type: 'post',
+				headers: {'X-CSRF-TOKEN': '{{csrf_token()}}' },
+				data: fd,
+				contentType: false,
+				processData: false,
+				success: function(response){ 
+                    //alert(response.upload_error);
+					jQuery('.hide-newsfeed_' + newsfeed_id).prepend(response.comment);
+					jQuery('.comment_add_' + newsfeed_id).html('<input type="text" class="form-control rounded comment-text-'+newsfeed_id+'" onkeydown="doComment(event, '+newsfeed_id+')" /> \
+									<input class="d-none" id="comment_file_'+newsfeed_id+'" type="file" name="image" /> \
+                                                        <div class="comment-attagement d-flex"> \
+                                                            <!-- <a href="javascript:void();"><i class="ri-link mr-3"></i></a> \
+                                                            <a href="javascript:void();"><i class="ri-user-smile-line mr-3"></i></a> --> \
+                                                            <a href="javascript:void();" onClick="commentPicture('+newsfeed_id+')"><i class="ri-camera-line mr-3"></i></a> \
+                                                        </div>'); 
+
+														//_html = data;
+					//$('.view-more-comment-btn-' + newsfeed_id).hide();
+					$(".comments_list_" + newsfeed_id).hide();
+					
+					$('.comment-reply-form').hide();
+		            $(".comment_reply_btn").unbind('click');
+		 
+					
+					$(".comment_reply_btn").click(function() {
+						var id = $(this).attr('id');
+						$(".cr_" + id).toggle();
+					});
+
+					$(".comment_reply_btn").click(function() {
+						var id = $(this).attr('id');
+					    $(".comment_reply_add_" + id).toggle();
+					});
+
+					
+
+					$(".comment_reply_child_btn").click(function() {
+						var id = $(this).attr('id');
+						$(".crc_" + id).toggle();
+					});
+					 
+					$('.comment-reply-form').on('submit', function(e) {
+						//console.log(4444444444444444444);
+						e.preventDefault();
+						CommentReplyForm(this);
+					});
+					$('.comment-reply-child-form').on('submit', function(e) {
+						e.preventDefault();
+						CommentReplyChildForm(this);
+				    });
+					 $('.facemocion').faceMocion({
+		emociones: [{
+				"emocion": "amo",
+				"TextoEmocion": "I love"
+			},
+			{
+				"emocion": "divierte",
+				"TextoEmocion": "I enjoy"
+			},
+			{
+				"emocion": "gusta",
+				"TextoEmocion": "I like"
+			},
+			{
+				"emocion": "asombro",
+				"TextoEmocion": "It amazes me"
+			},
+			{
+				"emocion": "alegre",
+				"TextoEmocion": "I am glad"
 			}
-		}
+		]
+	});
 
+				}
+			});
+    }
+ 
 	}
-
+    function commentPicture(newsfeed_id) {
+		jQuery('#comment_file_' + newsfeed_id).click();
+    }
     function editNewsFeed($this) 
     {
         newsfeed_id = $($this).attr('newsfeed_id');
@@ -2075,8 +2230,10 @@ function sharePost() {
 			reader.onload = function(e) {
 				$('#post_upload_Form + embed').remove();
 				 $('#post_upload_Form #preview_embed').html('<embed src="' + e.target.result + '" width="80" height="50">');
+                 enableDisablePost();
 			};
 			reader.readAsDataURL(input.files[0]);
+            
 		}
 	}
 
@@ -2788,12 +2945,13 @@ var page = 2;
 $(window).scroll(function() {
    if($(window).scrollTop() + $(window).height() == $(document).height()) {
 	   if (page !== false) {
+       jQuery('#page_load_loader').fadeIn();
        $.get( "{{ url('/load-more-profilefeed') }}/{{$userstring}}?page=" + page, function( data ) { 
             page++; 
 			jQuery('#newsfeedposts').append(data);
 		    reAddClickFunctions();
 			clickFunctionality();
-			if (data == '') { page = false; }
+			if (data == '') { page = false; jQuery('#page_load_loader').fadeOut(); }
 		});
 	}
    }

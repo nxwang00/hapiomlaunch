@@ -35,11 +35,11 @@
                             </div>
                         </a>
                     </li>
-                    <li>
+                   <!-- <li>
                         <a href="{{ url('/') }}" class="  d-flex align-items-center">
                             <i class="ri-home-line"></i>
                         </a>
-                    </li>
+                    </li>-->
                     <li class="nav-item">
                         <a class="search-toggle  " href="#"><i class="ri-group-line"></i></a>
                         <div class="iq-sub-dropdown iq-sub-dropdown-large">

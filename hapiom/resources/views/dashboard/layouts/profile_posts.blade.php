@@ -6,8 +6,8 @@
                                             @endphp
 
                                             @foreach($profilePosts as $profilePost)
-                                            <div class="post-item">
-                                                <div class="user-post-data p-3">
+                                            <div class="iq-card iq-card-block iq-card-stretch iq-card-height">
+                                            <div class="user-post-data  iq-card-body">
                                                     <div class="d-flex flex-wrap">
                                                         <div class="media-support-user-img mr-3">
                                                             @if(isset($user->userInfo->profile_image) && file_exists('images/profile/' . $user->userInfo->profile_image))
@@ -78,7 +78,7 @@
                                                     </div>
                                                 </div>
                                                 @if(isset($profilePost->text) && !empty($profilePost->text))
-                                                <div class="user-post">
+                                                <div class="user-post  iq-card-body">
                                                     <p>{{ $profilePost->text }}</p>
                                                 </div>
                                                 @endif
@@ -90,7 +90,7 @@
                                                 </div>
                                                 @endif
 
-                                                <div class="comment-area mt-3">
+                                                <div class="comment-area iq-card-body">
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <div class="like-block position-relative d-flex align-items-center">
                                                             <div class="d-flex align-items-center">
@@ -160,7 +160,7 @@
                                                                     <span class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="button">
                                                                         {{ $profilePost->NewsfeedComment->count() }} Comment
                                                                     </span>
-                                                                    <div class="dropdown-menu">
+                                                                    <div class="dropdown-menu" @if($profilePost->NewsfeedComment->count() == 0) style="background: #fff; border: 0 none;" @endif>
                                                                         @foreach($profilePost->NewsfeedComment as $key => $comment)
                                                                         <a class="dropdown-item" href="#">{{ ucwords($comment->NewsfeedUser->name) }}</a>
                                                                         @endforeach
@@ -191,7 +191,7 @@
   <li class="mb-2 reply_comment_add_{{ $comment->id }}" id="comment-el-{{ $comment->id }}">
     <div class="d-flex flex-wrap justify-content-start">
       <div class="user-img">
-        @if(isset($comment->profileImage->profile_image) && file_exists('images/profile'. $comment->profileImage->profile_image))
+        @if(isset($comment->profileImage->profile_image))
         <img src="{{ url('images/profile',$comment->profileImage->profile_image) }}" alt="userimg" class="avatar-35 rounded-circle img-fluid">
         @else
         <img src="{{url('assets/dashboard/img/default-avatar.png')}}" alt="userimg" class="avatar-35 rounded-circle img-fluid">
@@ -199,6 +199,9 @@
       </div>
       <div class="comment-data-block ml-3">
         <h6>{{ ucwords($comment->NewsfeedUser->name) }}</h6>
+        @if (isset($comment->CommentImage->image))
+	      <img src="{{ url('images/comments', $comment->CommentImage->image) }}" alt="image Comment" style="max-width: 300px; max-height: 300px;">
+		   @endif
         <p class="mb-0 comment-text-{{ $comment->id }}">{{ ucwords($comment->comment) }}</p>
         <div class="d-flex flex-wrap align-items-center comment-activity">
             <!------------------------------------------------->
@@ -285,10 +288,18 @@
   @endforeach
 </ul>
 <form class="comment-text align-items-center mt-3 comment-form comment_add_{{$profilePost->id}}" route="{{ route('comment_add')}}" user_id="{{ Auth::user()->id }}" newsfeed_id="{{ $profilePost->id }}" id="">
-  <div class="comment-box comment-text-{{ $profilePost->id }}" id="" contentEditable="true" name="comment" onkeydown="doComment(event, {{ $profilePost->id }})"></div>
-  <!-- <button class="badge badge-primary mt-2" id="submit" type="submit">Post</button>
-  <button class="badge badge-secondary mt-2 ml-2 comment_btn" id="{{$profilePost->id}}">Cancel</button> -->
-</form>
+								 
+
+                 <input type="text" class="form-control rounded comment-text-{{ $profilePost->id }}" onkeydown="doComment(event, {{ $profilePost->id }})" />
+                 <input class="d-none" id="comment_file_{{ $profilePost->id }}" type="file" name="image" />
+                                                       <div class="comment-attagement d-flex">
+                                                           <!-- <a href="javascript:void();"><i class="ri-link mr-3"></i></a>
+                                                           <a href="javascript:void();"><i class="ri-user-smile-line mr-3"></i></a> -->
+                                                           <a href="javascript:void();" onClick="commentPicture({{ $profilePost->id }})"><i class="ri-camera-line mr-3"></i></a>
+                                                       </div>
+
+               </form>
+
 @php
 if ($profilePost->NewsfeedComment->count() >= 2) {
   $view_more = 'View ' . $profilePost->NewsfeedComment->count() - 1 . ' more comments +';

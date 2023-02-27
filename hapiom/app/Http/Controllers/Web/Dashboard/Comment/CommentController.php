@@ -6,6 +6,8 @@ use App\Http\DataProviders\Web\Dashboard\Comment\IndexDataProvider;
 use App\Http\Requests\Web\Dashboard\Comment\IndexRequest;
 use App\Http\Requests\Web\Dashboard\Comment\StoreRequest;
 use App\Models\Newsfeedcomment;
+use App\Models\CommentGallery;
+//use App\Models\User;
 use App\Models\Newsfeedcommentreply;
 use App\Models\Newsfeedreplycommentlike;
 use App\Http\Controllers\Controller;
@@ -43,12 +45,102 @@ class CommentController extends Controller
     public function store(StoreRequest $request)
     {
         if ($request->ajax()) {
+            $request->request->add(['user_id' => Auth::id()]);
             if ($store = $request->persist()->getComment()) {
                 $comments = Newsfeedcomment::where('id', $store->id)->get();
                 $count = Newsfeedcomment::where('newsfeed_id', $store->newsfeed_id)->get()->count();
                 $response = array();
+                $user = Auth::user();
+ //
+                $upload_error = '';
+                if ($request->hasFile('comment_file')) { //let's find out if the user has uploaded an image as well
+                    $file = $request->file('comment_file');
+                    $image_name = $file->getClientOriginalName();
+                    $image_ext = $file->getClientOriginalExtension();
+                    $guess_ext = $file->guessClientExtension();
+                    $supported_image = array( 'gif', 'jpg', 'jpeg', 'png' );
+                    if (in_array(strtolower($guess_ext), $supported_image)) {
+                        $image_name = time() . $image_name;
+                        $file->move('images/comments', $image_name);
+                        $data1 = [
+                            'comment_id' => $store->id,
+                            'image'     => $image_name,
+                        ];
+                        $newsfeed_gallary = CommentGallery::create($data1);
+                        $upload_error = $file->getErrorMessage();
+                    } 
+                    
+                }
 
-                return response()->json(['status' => 'success', 'title' => 'Updated!', 'text' => 'Comment updated Successfully', 'data' => $response, "insertData" => $store]);
+                $user->profile_image = (Auth::user()->userInfo) ? url('/images/profile/', Auth::user()->userInfo->profile_image)  : '/assets/dashboard/img/default-avatar.png';
+                //insertData":{"user_id":48,"newsfeed_id":"130","comment":"imagination","updated_at":"2023-02-15T12:35:20.000000Z","created_at":"2023-02-15T12:35:20.000000Z","id":75}
+                $comment = '<li class="mb-2 comment-item reply_comment_add_'.$store->id.'">
+                <div class="d-flex flex-wrap justify-content-start">
+                    <div class="user-img"><img loading="lazy" src="'.$user->profile_image.'" class="avatar-35 rounded-circle img-fluid"></div>
+                    <div class="comment-data-block ml-3">
+                                <h6>'.ucwords($user->name).'</h6>';
+
+                                if (isset($store->CommentImage->image)) {
+	      							$comment .= '<img src="'.url('images/comments', $store->CommentImage->image).'" alt="image Comment" style="max-width: 300px; max-height: 300px;">';
+                                }
+
+                                $comment .= '<p class="mb-0 comment-text-'.$store->id.'">'.$store->comment.'</p>
+                                <div class="d-flex flex-wrap align-items-center comment-activity">
+
+                                <div class="dropdown">
+                                <span>&nbsp;
+                                    <a href="javascript:void();" class="likeCommentPost" comment_id="'.$store->id.'" newsfeed_id="'.$store->newsfeed_id.'" route="'.route('newsfeed-comment-like').'" users_id="'.$store->user_id.'">
+                                    <input type="hidden" value="gusta" class="facemocion" /></a>
+
+                                </span>
+                            </div>
+                          <a href="javascript:void();" class="likeCommentPost" comment_id="'.$store->id.'" newsfeed_id="'.$store->newsfeed_id.'" route="'.route('newsfeed-comment-like').'" users_id="'.$store->user_id.'">
+                          <span id="" class="total_comment_like_count_'.$store->id.'">0</span> like</a>
+                                <a href="javascript:void();" class="reply comment_reply_btn" id="'.$store->id.'">reply</a>
+                                <a href="javascript:void();">translate</a>
+                                <span>0 seconds ago</span>
+                            </div>
+                            <!-- Reply Comment Form  -->
+
+                            <form class="comment-text align-items-center mt-3 comment-reply-form comment_reply_add_'.$store->id.'" route="'.route('comment_reply_add').'" user_id="'.$store->user_id.'" newsfeed_id="'.$store->newsfeed_id.'" comment_id="'.$store->id.'" id="">
+                                <textarea class="form-control rounded comment-reply-text-'.$store->id.'" id="" name="comment" placeholder="" required></textarea>
+
+                                <button class="badge badge-primary mt-2" id="submit" type="submit">Post</button>
+                                <button class="badge badge-secondary mt-2 ml-2 comment_reply_btn" id="'.$store->id.'">Cancel</button>
+
+                            </form>
+                            <!-- ... end Reply Comment Form  -->
+                        </div>';
+                                
+                            $comment .= ' <div class="iq-card-post-toolbar d-inline-block">
+                                <div class="dropdown">
+                                    <span class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="button">
+                                        <i class="ri-more-fill"></i>
+                                    </span>
+                                    <div class="dropdown-menu m-0 p-0">
+                                        <a class="dropdown-item p-3 edit-comment" href="javascript:void();" route="'.route('edit-comment').'" comment_id="'.$store->id.'" data-toggle="modal" data-target="#commentModal">
+                                            <div class="d-flex align-items-top">
+                                                <div class="icon font-size-20"><i class="ri-edit-2-line"></i></div>
+                                                <div class="data ml-2">
+                                                    <h6>Edit comment</h6>
+                                                </div>
+                                            </div>
+                                        </a>
+                                        <a class="dropdown-item p-3 delete-comment" href="javascript:void();" route="'.route('delete-comment', $store->id).'" comment_id="'.$store->id.'">
+                                            <div class="d-flex align-items-top">
+                                                <div class="icon font-size-20"><i class="ri-delete-back-2-line"></i></div>
+                                                <div class="data ml-2">
+                                                    <h6>Delete comment</h6>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                </div>
+                </li>';
+
+                return response()->json(['status' => 'success', 'title' => 'Updated!', 'text' => 'Comment updated Successfully', 'data' => $response, "insertData" => $store, 'comment' => $comment, 'userdata' => $user, 'upload_error' => $upload_error]);
             }
         } else {
             return response()->json('Direct Access Not Allowed!!');
@@ -487,8 +579,11 @@ class CommentController extends Controller
                 $output .= '</div>';
 
                 $output .= '<div class="comment-data-block ml-3">
-                                <h6>' . ucwords($comment->NewsfeedUser->name) . '</h6>
-                                <p class="mb-0 comment-text-'. $comment->id . '">' . $comment->comment . '</p>
+                                <h6>' . ucwords($comment->NewsfeedUser->name) . '</h6>';
+                                if (isset($comment->CommentImage->image)) {
+                                    $output .= '<img src="'.url('images/comments', $comment->CommentImage->image).'" alt="image Comment" style="max-width: 300px; max-height: 300px;">';
+                              }
+                                $output .='<p class="mb-0 comment-text-'. $comment->id . '">' . $comment->comment . '</p>
                                 <div class="d-flex flex-wrap align-items-center comment-activity">
 
                                 <div class="dropdown">
@@ -521,10 +616,22 @@ class CommentController extends Controller
                                                     $output .='</div>';
 
                         $output .='<a href="javascript:void();" class="likeCommentPost" comment_id="' . $comment->id . '" newsfeed_id="' . $request->newsfeed_id . '" route="' . route('newsfeed-comment-like') . '" users_id="' . Auth::user()->id . '"><span id="" class="total_comment_like_count_'.$comment->id.'">'.($comment->NewsfeedcommentLike ? $comment->NewsfeedcommentLike->count() : "0").'</span> like</a>
-                                    <a href="javascript:void();">reply</a>
+                                    <a href="javascript:void();" class="reply comment_reply_btn" id="' . $comment->id . '">reply</a>
                                     <a href="javascript:void();">translate</a>
                                     <span> ' . newsfeeddateformate($comment->created_at) . ' </span>
                                 </div>
+
+                                <!-- Reply Comment Form  -->
+
+												<form class="comment-text align-items-center mt-3 comment-reply-form comment_reply_add_' . $comment->id . '" route="'.route('comment_reply_add').'" user_id="'.Auth::user()->id.'" newsfeed_id="'.$request->newsfeed_id.'" comment_id="'.$comment->id.'" id="">
+													<textarea class="form-control rounded comment-reply-text-' . $comment->id . '" id="" name="comment" placeholder="" required></textarea>
+
+													<button class="badge badge-primary mt-2" id="submit" type="submit">Post</button>
+													<button class="badge badge-secondary mt-2 ml-2 comment_reply_btn" id="' . $comment->id . '">Cancel</button>
+
+												</form>
+												<!-- ... end Reply Comment Form  -->
+
                             </div>
                             <div class="iq-card-post-toolbar d-inline-block">
                                 <div class="dropdown">

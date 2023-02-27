@@ -3,6 +3,7 @@
 namespace App\Models;
 use App\Models\Newsfeedcomment;
 use App\Models\Newsfeed;
+use App\Models\CommentGallery;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -34,6 +35,11 @@ class Newsfeedcomment extends Model
     public function profileImage()
     {
         return $this->belongsTo('App\Models\Userinfo','user_id','user_id'); 
+    }
+
+    public function CommentImage()
+    {
+        return $this->belongsTo('App\Models\CommentGallery','id','comment_id'); 
     }
 }
 

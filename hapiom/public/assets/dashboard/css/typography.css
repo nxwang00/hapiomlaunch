@@ -311,7 +311,7 @@ loading
 }
 .right-sidebar-mini {
     top: 75px;
-    z-index: 100;
+    z-index: 1052;
     position: fixed;
     width: 260px;
     right: 0;

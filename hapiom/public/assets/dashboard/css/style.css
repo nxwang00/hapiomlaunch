@@ -3785,7 +3785,11 @@ span.avatar-status {
     color: var(--iq-white);
     background: var(--iq-primary);
     border-radius: 15px;
-    box-shadow: 0 2px 4px 0 rgb(80, 181, 255);
+    /*box-shadow: 0 2px 4px 0 rgb(80, 181, 255);*/
+}
+
+.chat-time {
+    color: #000;
 }
 .chat-message > p {
     margin: 0;
@@ -3815,12 +3819,16 @@ span.avatar-status {
 }
 #chat-msg {
     position: fixed;
-    bottom: 80px;
-    left: 0px;
+    bottom: 25%;
+    left: 10%;
+    margin-left: 0px !important;
+    z-index: 1051;
 }
 #chat-msg .chat-block {
     float: left;
     background-color: grey;
+    background: url(../images/page-img/200.jpg);
+    background-size: cover;
     height: 552px;
     margin-right: 5px;
 }
@@ -4098,6 +4106,7 @@ form.comment-text input {
     left: auto;
     right: 0;
     font-size: 20px;
+    top: 0.3em;
 }
 .comment-attagement a {
     color: var(--iq-body-text);

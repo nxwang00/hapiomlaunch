@@ -92,7 +92,7 @@
 								<li class="col-md-3 p-0">
 									<a class="nav-link" data-toggle="pill" href="#chang-pwd">
 										Change Password
-									</a>
+									</a> 
 								</li>
 								<li class="col-md-3 p-0">
 									<a class="nav-link @if($activeTab==='membership') active @endif" data-toggle="pill" href="#upgrade-plan">

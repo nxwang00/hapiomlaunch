@@ -95,7 +95,7 @@
                                 <div class="form-group">
                                     <label for="exampleInputPassword1">Group Type</label>
                                     <select class="form-control group_type" id="group_type" name="group_type">
-                                    		<option value="0">Free</option>
+                                    		<option value="0">Basic</option>
 										    <option value="1">Paid</option>
                                     </select>
                                 </div>
